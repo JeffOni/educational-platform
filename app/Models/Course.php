@@ -1,0 +1,58 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class Course extends Model
+{
+    use HasFactory;
+
+    protected $guarded = ['id'];
+
+    const BORRADOR = 1;
+    const REVISION = 2;
+    const PUBLICADO = 3;
+
+    // Relaciones
+    public function teacher()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function level()
+    {
+        return $this->belongsTo(Level::class);
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(Category::class);
+    }
+
+    public function sections()
+    {
+        return $this->hasMany(Section::class);
+    }
+
+    public function reviews()
+    {
+        return $this->hasMany(Review::class);
+    }
+
+    public function enrollments()
+    {
+        return $this->hasMany(Enrollment::class);
+    }
+
+    public function students()
+    {
+        return $this->belongsToMany(User::class, 'enrollments');
+    }
+
+    public function lessons()
+    {
+        return $this->hasManyThrough(Lesson::class, Section::class);
+    }
+}
