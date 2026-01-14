@@ -38,13 +38,13 @@ interface Props {
 const props = defineProps<Props>();
 
 const form = useForm({
-    _method: 'PUT',
     title: props.course.title,
     subtitle: props.course.subtitle,
     description: props.course.description,
     price: props.course.price,
     category_id: props.course.category_id,
     level_id: props.course.level_id,
+    status: props.course.status,
     image: null as File | null,
 });
 
@@ -78,8 +78,23 @@ const removeImage = () => {
 };
 
 const submit = () => {
-    form.post(`/admin/courses/${props.course.id}`, {
+    // Asegurar que status sea un número
+    form.status = parseInt(form.status as any);
+    
+    console.log('Datos del formulario:', {
+        title: form.title,
+        status: form.status,
+        tipo: typeof form.status
+    });
+    
+    form.put(`/admin/courses/${props.course.id}`, {
         preserveScroll: true,
+        onSuccess: () => {
+            console.log('Curso actualizado exitosamente');
+        },
+        onError: (errors) => {
+            console.error('Error al actualizar:', errors);
+        },
     });
 };
 
@@ -227,6 +242,25 @@ const breadcrumbs = [
                                         class="w-full rounded-md border px-3 py-2"
                                         required
                                     />
+                                </div>
+
+                                <div>
+                                    <label
+                                        class="mb-2 block text-sm font-medium"
+                                        >Estado del Curso *</label
+                                    >
+                                    <select
+                                        v-model.number="form.status"
+                                        class="w-full rounded-md border px-3 py-2"
+                                        required
+                                    >
+                                        <option :value="1">📝 Borrador</option>
+                                        <option :value="2">🔍 En Revisión</option>
+                                        <option :value="3">✅ Publicado</option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Solo los cursos publicados serán visibles para los estudiantes
+                                    </p>
                                 </div>
                             </div>
 

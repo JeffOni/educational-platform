@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import StudentLayout from '@/layouts/StudentLayout.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import {
     AlertCircle,
@@ -279,7 +279,7 @@ const canEditSubmission = (submission: Submission | null) => {
 <template>
     <Head :title="lesson.name" />
 
-    <AppLayout>
+    <StudentLayout>
         <div class="min-h-screen bg-gray-50">
             <!-- Video Player -->
             <div class="bg-black">
@@ -1154,5 +1154,5 @@ const canEditSubmission = (submission: Submission | null) => {
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </StudentLayout>
 </template>

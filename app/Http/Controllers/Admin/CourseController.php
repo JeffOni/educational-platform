@@ -19,7 +19,12 @@ class CourseController extends Controller
             ->with(['category', 'level'])
             ->withCount('sections')
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($course) {
+                // Asegurar que status sea integer
+                $course->status = (int) $course->status;
+                return $course;
+            });
 
         return Inertia::render('Admin/Courses/Index', [
             'courses' => $courses
@@ -94,10 +99,11 @@ class CourseController extends Controller
             'price' => 'required|numeric',
             'category_id' => 'required|exists:categories,id',
             'level_id' => 'required|exists:levels,id',
+            'status' => 'required|integer|in:1,2,3',
             'image' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->all();
+        $data = $request->only(['title', 'subtitle', 'description', 'price', 'category_id', 'level_id', 'status']);
 
         if ($request->hasFile('image')) {
             if ($course->image_path) {
@@ -112,6 +118,18 @@ class CourseController extends Controller
 
         return redirect()->route('admin.courses.edit', $course)
             ->with('success', 'Curso actualizado correctamente');
+    }
+
+    public function publish(Course $course)
+    {
+        if ($course->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $course->update(['status' => Course::PUBLICADO]);
+
+        return redirect()->back()
+            ->with('success', 'Curso publicado correctamente');
     }
 
     public function destroy(Course $course)

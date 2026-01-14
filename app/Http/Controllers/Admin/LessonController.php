@@ -11,7 +11,12 @@ class LessonController extends Controller
 {
     public function store(Request $request, Section $section)
     {
-        $request->validate([
+        \Log::info('Creando lección', [
+            'section_id' => $section->id,
+            'datos_recibidos' => $request->all()
+        ]);
+
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'video_type' => 'required|in:youtube,vimeo,file,spaces',
             'video_url' => 'required|string',
@@ -19,7 +24,9 @@ class LessonController extends Controller
             'is_preview' => 'boolean',
         ]);
 
-        $section->lessons()->create([
+        \Log::info('Datos validados', $validated);
+
+        $lesson = $section->lessons()->create([
             'name' => $request->name,
             'video_type' => $request->video_type,
             'video_url' => $request->video_url,
@@ -27,7 +34,9 @@ class LessonController extends Controller
             'is_preview' => $request->boolean('is_preview'),
         ]);
 
-        return back();
+        \Log::info('Lección creada', ['lesson_id' => $lesson->id]);
+
+        return back()->with('success', 'Lección creada correctamente');
     }
 
     public function update(Request $request, Lesson $lesson)
@@ -48,12 +57,12 @@ class LessonController extends Controller
             'is_preview' => $request->boolean('is_preview'),
         ]);
 
-        return back();
+        return back()->with('success', 'Lección actualizada correctamente');
     }
 
     public function destroy(Lesson $lesson)
     {
         $lesson->delete();
-        return back();
+        return back()->with('success', 'Lección eliminada correctamente');
     }
 }

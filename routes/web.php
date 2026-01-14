@@ -16,6 +16,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\LevelController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
+use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\PurchaseController;
 use App\Http\Controllers\Student\LessonController as StudentLessonController;
 use App\Http\Controllers\Student\QuestionController as StudentQuestionController;
@@ -28,13 +29,22 @@ Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Dashboard con redirección según rol
     Route::get('/dashboard', function () {
+        $user = auth()->user();
+        
+        if ($user->hasRole('student')) {
+            return app(StudentDashboardController::class)->index();
+        }
+        
+        // Dashboard para admin/teacher
         return Inertia::render('Dashboard');
     })->name('dashboard');
 
     // Rutas para Administradores y Profesores
     Route::middleware(['role:admin|teacher'])->prefix('admin')->name('admin.')->group(function () {
         Route::resource('courses', AdminCourseController::class);
+        Route::put('courses/{course}/publish', [AdminCourseController::class, 'publish'])->name('courses.publish');
 
         // Rutas para Secciones
         Route::post('courses/{course}/sections', [SectionController::class, 'store'])->name('courses.sections.store');

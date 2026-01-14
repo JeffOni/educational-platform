@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, useForm, router } from '@inertiajs/vue3';
 import { CheckCheck, Download, FileText, User } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -83,7 +83,7 @@ const startGrading = (submission: Submission) => {
 };
 
 const submitGrade = (submissionId: number) => {
-    gradeForm.post(route('admin.submissions.grade', submissionId), {
+    gradeForm.post(`/admin/submissions/${submissionId}/grade`, {
         preserveScroll: true,
         onSuccess: () => {
             gradingSubmission.value = null;
@@ -103,7 +103,7 @@ const formatDate = (date: string) => {
 };
 
 const downloadFile = (submissionId: number) => {
-    window.location.href = route('student.submissions.download', submissionId);
+    router.visit(`/student/submissions/${submissionId}/download`);
 };
 
 const getSubmissionStatus = (submission: Submission) => {
@@ -125,17 +125,13 @@ const pendingCount = props.submissions.length - gradedCount;
             <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
                 <!-- Breadcrumb -->
                 <div class="mb-6 text-sm text-gray-600">
-                    <a
-                        :href="
-                            route(
-                                'admin.courses.edit',
-                                assignment.lesson.section.course.id,
-                            )
-                        "
-                        class="hover:text-gray-900"
+                    <Button
+                        variant="link"
+                        class="p-0 h-auto hover:text-gray-900"
+                        @click="router.visit(`/admin/courses/${assignment.lesson.section.course.id}/edit`)"
                     >
                         {{ assignment.lesson.section.course.title }}
-                    </a>
+                    </Button>
                     <span class="mx-2">/</span>
                     <span>{{ assignment.lesson.section.name }}</span>
                     <span class="mx-2">/</span>

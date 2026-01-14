@@ -14,6 +14,11 @@ class PurchaseController extends Controller
     {
         $user = auth()->user();
 
+        // Verificar que el curso esté publicado
+        if ($course->status !== Course::PUBLICADO) {
+            return redirect()->back()->with('error', 'Este curso no está disponible para compra.');
+        }
+
         // Verificar si ya compró el curso
         if (Purchase::where('user_id', $user->id)->where('course_id', $course->id)->exists()) {
             return redirect()->back()->with('error', 'Ya has comprado este curso.');

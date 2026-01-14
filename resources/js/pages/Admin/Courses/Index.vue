@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Button } from '@/components/ui/button';
 import {
@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Eye } from 'lucide-vue-next';
+import { Plus, Pencil, Trash2, Eye, CheckCircle } from 'lucide-vue-next';
 
 interface Category {
     id: number;
@@ -40,14 +40,38 @@ interface Props {
     courses: Course[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
+
+// Debug: ver qué datos llegan
+console.log('Cursos cargados:', props.courses.map(c => ({ 
+    id: c.id, 
+    title: c.title, 
+    status: c.status, 
+    tipo: typeof c.status 
+})));
 
 const getStatusBadge = (status: number) => {
-    return status === 1 ? 'Borrador' : status === 2 ? 'Publicado' : 'Borrador';
+    if (status === 1) return 'Borrador';
+    if (status === 2) return 'En Revisión';
+    if (status === 3) return 'Publicado';
+    return 'Borrador';
 };
 
 const getStatusVariant = (status: number): 'default' | 'secondary' | 'destructive' => {
-    return status === 2 ? 'default' : 'secondary';
+    if (status === 3) return 'default'; // Publicado - verde
+    if (status === 2) return 'secondary'; // En revisión - gris
+    return 'secondary'; // Borrador - gris
+};
+
+const publishCourse = (courseId: number) => {
+    if (confirm('¿Estás seguro de publicar este curso?')) {
+        router.put(`/admin/courses/${courseId}/publish`, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Curso publicado
+            },
+        });
+    }
 };
 
 const breadcrumbs = [
@@ -137,6 +161,15 @@ const breadcrumbs = [
                                 </TableCell>
                                 <TableCell class="text-right">
                                     <div class="flex justify-end gap-2">
+                                        <Button 
+                                            v-if="course.status !== 3"
+                                            variant="default" 
+                                            size="sm"
+                                            @click="publishCourse(course.id)"
+                                            title="Publicar curso"
+                                        >
+                                            <CheckCircle class="h-4 w-4" />
+                                        </Button>
                                         <Button variant="outline" size="sm" as-child>
                                             <Link :href="`/admin/courses/${course.id}/edit`">
                                                 <Pencil class="h-4 w-4" />

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AppLayout from '@/layouts/AppLayout.vue';
+import StudentLayout from '@/layouts/StudentLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 defineProps<{
@@ -10,9 +10,9 @@ defineProps<{
 <template>
     <Head title="Mis Cursos" />
 
-    <AppLayout :breadcrumbs="[{ title: 'Mis Cursos', href: '#' }]">
-        <div class="py-12">
-            <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <StudentLayout>
+        <div>
+            <div>
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg p-6">
                     <h1 class="text-3xl font-bold mb-8 text-gray-900 dark:text-gray-100">Mis Cursos</h1>
 
@@ -70,5 +70,5 @@ defineProps<{
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </StudentLayout>
 </template>

@@ -11,6 +11,11 @@ class Course extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'status' => 'integer',
+        'price' => 'decimal:2',
+    ];
+
     const BORRADOR = 1;
     const REVISION = 2;
     const PUBLICADO = 3;

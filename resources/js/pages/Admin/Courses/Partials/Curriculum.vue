@@ -30,7 +30,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { useForm } from '@inertiajs/vue3';
+import { router, useForm } from '@inertiajs/vue3';
 import {
     ClipboardList,
     Clock,
@@ -46,7 +46,7 @@ import {
     Users,
     X,
 } from 'lucide-vue-next';
-import { ref } from 'vue';
+import { nextTick, ref } from 'vue';
 
 interface Resource {
     id: number;
@@ -106,9 +106,30 @@ const lessonForm = useForm({
     name: '',
     video_type: 'youtube',
     video_url: '',
-    duration: null as number | null,
+    duration: '' as string | number | null,
     is_preview: false,
 });
+
+// Función para convertir MM:SS a segundos
+const durationToSeconds = (duration: string | number | null): number | null => {
+    if (!duration) return null;
+    if (typeof duration === 'number') return duration;
+
+    const parts = duration.toString().split(':');
+    if (parts.length !== 2) return null;
+
+    const minutes = parseInt(parts[0]) || 0;
+    const seconds = parseInt(parts[1]) || 0;
+    return minutes * 60 + seconds;
+};
+
+// Función para convertir segundos a MM:SS
+const secondsToDuration = (seconds: number | null): string => {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+};
 
 const resourceForm = useForm({
     name: '',
@@ -130,9 +151,11 @@ const startAddingSection = () => {
 
 const saveSection = () => {
     sectionForm.post(`/admin/courses/${props.course.id}/sections`, {
+        preserveScroll: true,
         onSuccess: () => {
             addingSection.value = false;
             sectionForm.reset();
+            router.reload({ only: ['course'] });
         },
     });
 };
@@ -144,15 +167,22 @@ const editSection = (section: Section) => {
 
 const updateSection = (section: Section) => {
     sectionForm.put(`/admin/sections/${section.id}`, {
+        preserveScroll: true,
         onSuccess: () => {
             editingSection.value = null;
             sectionForm.reset();
+            router.reload({ only: ['course'] });
         },
     });
 };
 
 const deleteSection = (section: Section) => {
-    useForm({}).delete(`/admin/sections/${section.id}`);
+    router.delete(`/admin/sections/${section.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            router.reload({ only: ['course'] });
+        },
+    });
 };
 
 // Lesson Methods
@@ -162,12 +192,40 @@ const startAddingLesson = (sectionId: number) => {
 };
 
 const saveLesson = (sectionId: number) => {
-    lessonForm.post(`/admin/sections/${sectionId}/lessons`, {
-        onSuccess: () => {
-            addingLesson.value = null;
-            lessonForm.reset();
-        },
+    // Convertir duración a segundos
+    const durationInSeconds = durationToSeconds(lessonForm.duration);
+
+    console.log('Guardando lección:', {
+        sectionId,
+        name: lessonForm.name,
+        video_type: lessonForm.video_type,
+        video_url: lessonForm.video_url,
+        duration: durationInSeconds,
+        is_preview: lessonForm.is_preview ? 1 : 0,
     });
+
+    router.post(
+        `/admin/sections/${sectionId}/lessons`,
+        {
+            name: lessonForm.name,
+            video_type: lessonForm.video_type,
+            video_url: lessonForm.video_url,
+            duration: durationInSeconds,
+            is_preview: lessonForm.is_preview ? 1 : 0,
+        },
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                console.log('✓ Lección guardada exitosamente');
+                addingLesson.value = null;
+                lessonForm.reset();
+                router.reload({ only: ['course'] });
+            },
+            onError: (errors) => {
+                console.error('✗ Errores:', errors);
+            },
+        },
+    );
 };
 
 const editLesson = (lesson: Lesson) => {
@@ -175,21 +233,41 @@ const editLesson = (lesson: Lesson) => {
     lessonForm.name = lesson.name;
     lessonForm.video_type = lesson.video_type;
     lessonForm.video_url = lesson.video_url;
-    lessonForm.duration = lesson.duration;
+    lessonForm.duration = secondsToDuration(lesson.duration);
     lessonForm.is_preview = lesson.is_preview;
 };
 
 const updateLesson = (lesson: Lesson) => {
-    lessonForm.put(`/admin/lessons/${lesson.id}`, {
-        onSuccess: () => {
-            editingLesson.value = null;
-            lessonForm.reset();
+    router.put(
+        `/admin/lessons/${lesson.id}`,
+        {
+            name: lessonForm.name,
+            video_type: lessonForm.video_type,
+            video_url: lessonForm.video_url,
+            duration: durationToSeconds(lessonForm.duration),
+            is_preview: lessonForm.is_preview ? 1 : 0,
         },
-    });
+        {
+            preserveScroll: true,
+            onSuccess: () => {
+                editingLesson.value = null;
+                lessonForm.reset();
+                router.reload({ only: ['course'] });
+            },
+            onError: (errors) => {
+                console.error('✗ Errores al actualizar:', errors);
+            },
+        },
+    );
 };
 
 const deleteLesson = (lesson: Lesson) => {
-    useForm({}).delete(`/admin/lessons/${lesson.id}`);
+    router.delete(`/admin/lessons/${lesson.id}`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            router.reload({ only: ['course'] });
+        },
+    });
 };
 
 // Resource Methods
@@ -222,9 +300,17 @@ const deleteResource = (resource: Resource) => {
 
 // Assignment Methods
 const toggleAssignmentsPanel = (lessonId: number) => {
-    managingAssignments.value =
-        managingAssignments.value === lessonId ? null : lessonId;
-    editingAssignment.value = null;
+    const isCurrentlyOpen = managingAssignments.value === lessonId;
+    
+    if (isCurrentlyOpen) {
+        managingAssignments.value = null;
+        editingAssignment.value = null;
+    } else {
+        managingAssignments.value = lessonId;
+        managingResources.value = null; // Cerrar recursos
+        editingAssignment.value = null;
+    }
+
     assignmentForm.reset();
 };
 
@@ -244,8 +330,10 @@ const editAssignment = (assignment: Assignment) => {
     assignmentForm.max_points = assignment.max_points;
 };
 
-const updateAssignment = (assignment: Assignment) => {
-    assignmentForm.put(`/admin/assignments/${assignment.id}`, {
+const updateAssignment = () => {
+    if (!editingAssignment.value) return;
+
+    assignmentForm.put(`/admin/assignments/${editingAssignment.value}`, {
         onSuccess: () => {
             editingAssignment.value = null;
             assignmentForm.reset();
@@ -255,6 +343,15 @@ const updateAssignment = (assignment: Assignment) => {
 
 const deleteAssignment = (assignment: Assignment) => {
     useForm({}).delete(`/admin/assignments/${assignment.id}`);
+};
+
+const cancelAssignmentEdit = () => {
+    editingAssignment.value = null;
+    assignmentForm.reset();
+};
+
+const viewSubmissions = (assignmentId: number) => {
+    router.visit(`/admin/assignments/${assignmentId}/submissions`);
 };
 
 const cancelEdit = () => {
@@ -330,9 +427,7 @@ const formatFileSize = (bytes: number) => {
                                         section.name
                                     }}</CardTitle>
                                     <CardDescription class="text-sm">
-                                        {{
-                                            section.lessons?.length || 0
-                                        }}
+                                        {{ section.lessons?.length || 0 }}
                                         lecciones
                                     </CardDescription>
                                 </div>
@@ -654,9 +749,7 @@ const formatFileSize = (bytes: number) => {
                                                     <div
                                                         class="text-xs text-muted-foreground"
                                                     >
-                                                        {{
-                                                            resource.file_type
-                                                        }}
+                                                        {{ resource.file_type }}
                                                         •
                                                         {{
                                                             formatFileSize(
@@ -751,6 +844,7 @@ const formatFileSize = (bytes: number) => {
                                 <div
                                     v-if="managingAssignments === lesson.id"
                                     class="mt-4 space-y-4 rounded-lg bg-muted/50 p-4"
+                                    :key="`assignments-${lesson.id}`"
                                 >
                                     <div
                                         class="flex items-center justify-between"
@@ -761,11 +855,7 @@ const formatFileSize = (bytes: number) => {
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            @click="
-                                                toggleAssignmentsPanel(
-                                                    lesson.id,
-                                                )
-                                            "
+                                            @click="toggleAssignmentsPanel(lesson.id)"
                                         >
                                             <X class="h-4 w-4" />
                                         </Button>
@@ -784,84 +874,6 @@ const formatFileSize = (bytes: number) => {
                                             :key="assignment.id"
                                             class="rounded border bg-background p-3"
                                         >
-                                            <div
-                                                v-if="
-                                                    editingAssignment ===
-                                                    assignment.id
-                                                "
-                                                class="space-y-3"
-                                            >
-                                                <div class="space-y-2">
-                                                    <Label>Título</Label>
-                                                    <Input
-                                                        v-model="
-                                                            assignmentForm.title
-                                                        "
-                                                    />
-                                                </div>
-                                                <div class="space-y-2">
-                                                    <Label>Descripción</Label>
-                                                    <Textarea
-                                                        v-model="
-                                                            assignmentForm.description
-                                                        "
-                                                        rows="3"
-                                                    />
-                                                </div>
-                                                <div
-                                                    class="grid grid-cols-2 gap-3"
-                                                >
-                                                    <div class="space-y-2">
-                                                        <Label
-                                                            >Fecha límite</Label
-                                                        >
-                                                        <Input
-                                                            type="datetime-local"
-                                                            v-model="
-                                                                assignmentForm.due_date
-                                                            "
-                                                        />
-                                                    </div>
-                                                    <div class="space-y-2">
-                                                        <Label
-                                                            >Puntos
-                                                            máximos</Label
-                                                        >
-                                                        <Input
-                                                            type="number"
-                                                            v-model="
-                                                                assignmentForm.max_points
-                                                            "
-                                                        />
-                                                    </div>
-                                                </div>
-                                                <div class="flex gap-2">
-                                                    <Button
-                                                        size="sm"
-                                                        @click="
-                                                            updateAssignment(
-                                                                assignment,
-                                                            )
-                                                        "
-                                                    >
-                                                        <Save
-                                                            class="mr-2 h-4 w-4"
-                                                        />
-                                                        Actualizar
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        @click="
-                                                            editingAssignment =
-                                                                null
-                                                        "
-                                                    >
-                                                        Cancelar
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                            <div v-else>
                                                 <div
                                                     class="flex items-start justify-between"
                                                 >
@@ -910,11 +922,8 @@ const formatFileSize = (bytes: number) => {
                                                             size="sm"
                                                             variant="outline"
                                                             @click="
-                                                                $inertia.visit(
-                                                                    route(
-                                                                        'admin.assignments.submissions',
-                                                                        assignment.id,
-                                                                    ),
+                                                                viewSubmissions(
+                                                                    assignment.id,
                                                                 )
                                                             "
                                                         >
@@ -936,53 +945,21 @@ const formatFileSize = (bytes: number) => {
                                                                 class="h-4 w-4"
                                                             />
                                                         </Button>
-                                                        <AlertDialog>
-                                                            <AlertDialogTrigger
-                                                                as-child
-                                                            >
-                                                                <Button
-                                                                    size="sm"
-                                                                    variant="ghost"
-                                                                >
-                                                                    <Trash2
-                                                                        class="h-4 w-4 text-destructive"
-                                                                    />
-                                                                </Button>
-                                                            </AlertDialogTrigger>
-                                                            <AlertDialogContent>
-                                                                <AlertDialogHeader>
-                                                                    <AlertDialogTitle
-                                                                        >¿Eliminar
-                                                                        tarea?</AlertDialogTitle
-                                                                    >
-                                                                    <AlertDialogDescription>
-                                                                        Se
-                                                                        eliminarán
-                                                                        todas
-                                                                        las
-                                                                        entregas
-                                                                        asociadas.
-                                                                    </AlertDialogDescription>
-                                                                </AlertDialogHeader>
-                                                                <AlertDialogFooter>
-                                                                    <AlertDialogCancel
-                                                                        >Cancelar</AlertDialogCancel
-                                                                    >
-                                                                    <AlertDialogAction
-                                                                        @click="
-                                                                            deleteAssignment(
-                                                                                assignment,
-                                                                            )
-                                                                        "
-                                                                    >
-                                                                        Eliminar
-                                                                    </AlertDialogAction>
-                                                                </AlertDialogFooter>
-                                                            </AlertDialogContent>
-                                                        </AlertDialog>
+                                                        <Button
+                                                            size="sm"
+                                                            variant="ghost"
+                                                            @click="
+                                                                deleteAssignment(
+                                                                    assignment,
+                                                                )
+                                                            "
+                                                        >
+                                                            <Trash2
+                                                                class="h-4 w-4 text-destructive"
+                                                            />
+                                                        </Button>
                                                     </div>
                                                 </div>
-                                            </div>
                                         </div>
                                     </div>
 
@@ -1031,17 +1008,44 @@ const formatFileSize = (bytes: number) => {
                                                 />
                                             </div>
                                         </div>
-                                        <Button
-                                            size="sm"
-                                            @click="saveAssignment(lesson.id)"
-                                            :disabled="
-                                                !assignmentForm.title ||
-                                                !assignmentForm.description
-                                            "
-                                        >
-                                            <Plus class="mr-2 h-4 w-4" />
-                                            Crear Tarea
-                                        </Button>
+                                        <div class="flex gap-2">
+                                            <Button
+                                                v-if="editingAssignment"
+                                                size="sm"
+                                                variant="outline"
+                                                @click="cancelAssignmentEdit"
+                                            >
+                                                Cancelar
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                @click="
+                                                    editingAssignment
+                                                        ? updateAssignment()
+                                                        : saveAssignment(
+                                                              lesson.id,
+                                                          )
+                                                "
+                                                :disabled="
+                                                    !assignmentForm.title ||
+                                                    !assignmentForm.description
+                                                "
+                                            >
+                                                <Save
+                                                    v-if="editingAssignment"
+                                                    class="mr-2 h-4 w-4"
+                                                />
+                                                <Plus
+                                                    v-else
+                                                    class="mr-2 h-4 w-4"
+                                                />
+                                                {{
+                                                    editingAssignment
+                                                        ? 'Actualizar Tarea'
+                                                        : 'Crear Tarea'
+                                                }}
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -1134,12 +1138,14 @@ const formatFileSize = (bytes: number) => {
                                 <Button
                                     variant="outline"
                                     size="sm"
+                                    type="button"
                                     @click="cancelEdit"
                                 >
                                     Cancelar
                                 </Button>
                                 <Button
                                     size="sm"
+                                    type="button"
                                     @click="saveLesson(section.id)"
                                 >
                                     <Plus class="mr-2 h-4 w-4" />

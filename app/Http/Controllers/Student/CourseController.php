@@ -24,6 +24,11 @@ class CourseController extends Controller
             ->where('course_id', $course->id)
             ->exists();
 
+        // Solo permitir ver cursos publicados o ya comprados
+        if ($course->status !== Course::PUBLICADO && !$hasPurchased) {
+            abort(404);
+        }
+
         return Inertia::render('Student/Courses/Show', [
             'course' => $course->load('teacher', 'category', 'level', 'sections.lessons'),
             'hasPurchased' => $hasPurchased,

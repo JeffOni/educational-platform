@@ -10,6 +10,11 @@ class CourseController extends Controller
 {
     public function show(Course $course)
     {
+        // Solo permitir ver cursos publicados
+        if ($course->status !== Course::PUBLICADO) {
+            abort(404);
+        }
+
         $hasPurchased = false;
         
         if (auth()->check()) {
