@@ -421,9 +421,7 @@ const canEditSubmission = (submission: Submission | null) => {
                                     @click="showResources = !showResources"
                                     class="text-sm font-medium text-indigo-600 hover:text-indigo-700"
                                 >
-                                    {{
-                                        showResources ? 'Ocultar' : 'Mostrar'
-                                    }}
+                                    {{ showResources ? 'Ocultar' : 'Mostrar' }}
                                     ({{ lesson.resources.length }})
                                 </button>
                             </div>
@@ -863,9 +861,7 @@ const canEditSubmission = (submission: Submission | null) => {
                                     @click="showQuestions = !showQuestions"
                                     class="text-sm font-medium text-indigo-600 hover:text-indigo-700"
                                 >
-                                    {{
-                                        showQuestions ? 'Ocultar' : 'Mostrar'
-                                    }}
+                                    {{ showQuestions ? 'Ocultar' : 'Mostrar' }}
                                     ({{ questions.length }})
                                 </button>
                             </div>

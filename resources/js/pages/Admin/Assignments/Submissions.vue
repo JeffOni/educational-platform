@@ -20,7 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
-import { Head, useForm, router } from '@inertiajs/vue3';
+import { Head, router, useForm } from '@inertiajs/vue3';
 import { CheckCheck, Download, FileText, User } from 'lucide-vue-next';
 import { ref } from 'vue';
 
@@ -127,8 +127,12 @@ const pendingCount = props.submissions.length - gradedCount;
                 <div class="mb-6 text-sm text-gray-600">
                     <Button
                         variant="link"
-                        class="p-0 h-auto hover:text-gray-900"
-                        @click="router.visit(`/admin/courses/${assignment.lesson.section.course.id}/edit`)"
+                        class="h-auto p-0 hover:text-gray-900"
+                        @click="
+                            router.visit(
+                                `/admin/courses/${assignment.lesson.section.course.id}/edit`,
+                            )
+                        "
                     >
                         {{ assignment.lesson.section.course.title }}
                     </Button>

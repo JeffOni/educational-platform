@@ -80,13 +80,13 @@ const removeImage = () => {
 const submit = () => {
     // Asegurar que status sea un número
     form.status = parseInt(form.status as any);
-    
+
     console.log('Datos del formulario:', {
         title: form.title,
         status: form.status,
-        tipo: typeof form.status
+        tipo: typeof form.status,
     });
-    
+
     form.put(`/admin/courses/${props.course.id}`, {
         preserveScroll: true,
         onSuccess: () => {
@@ -255,11 +255,14 @@ const breadcrumbs = [
                                         required
                                     >
                                         <option :value="1">📝 Borrador</option>
-                                        <option :value="2">🔍 En Revisión</option>
+                                        <option :value="2">
+                                            🔍 En Revisión
+                                        </option>
                                         <option :value="3">✅ Publicado</option>
                                     </select>
                                     <p class="mt-1 text-xs text-gray-500">
-                                        Solo los cursos publicados serán visibles para los estudiantes
+                                        Solo los cursos publicados serán
+                                        visibles para los estudiantes
                                     </p>
                                 </div>
                             </div>

@@ -18,9 +18,11 @@ class DashboardController extends Controller
 
         // Obtener cursos inscritos con progreso
         $enrolledCourses = Enrollment::where('user_id', $user->id)
-            ->with(['course' => function ($query) {
-                $query->with(['user', 'sections.lessons']);
-            }])
+            ->with([
+                'course' => function ($query) {
+                    $query->with(['user', 'sections.lessons']);
+                }
+            ])
             ->get()
             ->map(function ($enrollment) use ($user) {
                 $course = $enrollment->course;
@@ -52,10 +54,10 @@ class DashboardController extends Controller
 
         // Obtener tareas pendientes
         $enrolledCourseIds = $enrolledCourses->pluck('id');
-        
+
         $pendingAssignments = LessonAssignment::whereHas('lesson.section.course', function ($query) use ($enrolledCourseIds) {
-                $query->whereIn('id', $enrolledCourseIds);
-            })
+            $query->whereIn('id', $enrolledCourseIds);
+        })
             ->where('due_date', '>=', now())
             ->whereDoesntHave('submissions', function ($query) use ($user) {
                 $query->where('user_id', $user->id);

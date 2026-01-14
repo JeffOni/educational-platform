@@ -46,7 +46,7 @@ import {
     Users,
     X,
 } from 'lucide-vue-next';
-import { nextTick, ref } from 'vue';
+import { ref } from 'vue';
 
 interface Resource {
     id: number;
@@ -301,7 +301,7 @@ const deleteResource = (resource: Resource) => {
 // Assignment Methods
 const toggleAssignmentsPanel = (lessonId: number) => {
     const isCurrentlyOpen = managingAssignments.value === lessonId;
-    
+
     if (isCurrentlyOpen) {
         managingAssignments.value = null;
         editingAssignment.value = null;
@@ -855,7 +855,11 @@ const formatFileSize = (bytes: number) => {
                                         <Button
                                             size="sm"
                                             variant="ghost"
-                                            @click="toggleAssignmentsPanel(lesson.id)"
+                                            @click="
+                                                toggleAssignmentsPanel(
+                                                    lesson.id,
+                                                )
+                                            "
                                         >
                                             <X class="h-4 w-4" />
                                         </Button>
@@ -874,92 +878,88 @@ const formatFileSize = (bytes: number) => {
                                             :key="assignment.id"
                                             class="rounded border bg-background p-3"
                                         >
-                                                <div
-                                                    class="flex items-start justify-between"
-                                                >
-                                                    <div class="flex-1">
-                                                        <div
-                                                            class="font-medium"
-                                                        >
-                                                            {{
-                                                                assignment.title
-                                                            }}
-                                                        </div>
-                                                        <p
-                                                            class="mt-1 text-sm text-muted-foreground"
-                                                        >
-                                                            {{
-                                                                assignment.description
-                                                            }}
-                                                        </p>
-                                                        <div
-                                                            class="mt-2 flex gap-4 text-xs text-muted-foreground"
-                                                        >
-                                                            <span
-                                                                v-if="
-                                                                    assignment.due_date
-                                                                "
-                                                            >
-                                                                Vence:
-                                                                {{
-                                                                    new Date(
-                                                                        assignment.due_date,
-                                                                    ).toLocaleString(
-                                                                        'es-ES',
-                                                                    )
-                                                                }}
-                                                            </span>
-                                                            <span
-                                                                >Puntos:
-                                                                {{
-                                                                    assignment.max_points
-                                                                }}</span
-                                                            >
-                                                        </div>
+                                            <div
+                                                class="flex items-start justify-between"
+                                            >
+                                                <div class="flex-1">
+                                                    <div class="font-medium">
+                                                        {{ assignment.title }}
                                                     </div>
-                                                    <div class="flex gap-2">
-                                                        <Button
-                                                            size="sm"
-                                                            variant="outline"
-                                                            @click="
-                                                                viewSubmissions(
-                                                                    assignment.id,
-                                                                )
+                                                    <p
+                                                        class="mt-1 text-sm text-muted-foreground"
+                                                    >
+                                                        {{
+                                                            assignment.description
+                                                        }}
+                                                    </p>
+                                                    <div
+                                                        class="mt-2 flex gap-4 text-xs text-muted-foreground"
+                                                    >
+                                                        <span
+                                                            v-if="
+                                                                assignment.due_date
                                                             "
                                                         >
-                                                            <Users
-                                                                class="mr-1 h-4 w-4"
-                                                            />
-                                                            Ver Entregas
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            @click="
-                                                                editAssignment(
-                                                                    assignment,
+                                                            Vence:
+                                                            {{
+                                                                new Date(
+                                                                    assignment.due_date,
+                                                                ).toLocaleString(
+                                                                    'es-ES',
                                                                 )
-                                                            "
+                                                            }}
+                                                        </span>
+                                                        <span
+                                                            >Puntos:
+                                                            {{
+                                                                assignment.max_points
+                                                            }}</span
                                                         >
-                                                            <Pencil
-                                                                class="h-4 w-4"
-                                                            />
-                                                        </Button>
-                                                        <Button
-                                                            size="sm"
-                                                            variant="ghost"
-                                                            @click="
-                                                                deleteAssignment(
-                                                                    assignment,
-                                                                )
-                                                            "
-                                                        >
-                                                            <Trash2
-                                                                class="h-4 w-4 text-destructive"
-                                                            />
-                                                        </Button>
                                                     </div>
                                                 </div>
+                                                <div class="flex gap-2">
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        @click="
+                                                            viewSubmissions(
+                                                                assignment.id,
+                                                            )
+                                                        "
+                                                    >
+                                                        <Users
+                                                            class="mr-1 h-4 w-4"
+                                                        />
+                                                        Ver Entregas
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        @click="
+                                                            editAssignment(
+                                                                assignment,
+                                                            )
+                                                        "
+                                                    >
+                                                        <Pencil
+                                                            class="h-4 w-4"
+                                                        />
+                                                    </Button>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="ghost"
+                                                        @click="
+                                                            deleteAssignment(
+                                                                assignment,
+                                                            )
+                                                        "
+                                                    >
+                                                        <Trash2
+                                                            class="h-4 w-4 text-destructive"
+                                                        />
+                                                    </Button>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
 

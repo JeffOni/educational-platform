@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link, router } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -10,9 +10,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2, Eye, CheckCircle } from 'lucide-vue-next';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link, router } from '@inertiajs/vue3';
+import { CheckCircle, Eye, Pencil, Plus, Trash2 } from 'lucide-vue-next';
 
 interface Category {
     id: number;
@@ -43,12 +43,15 @@ interface Props {
 const props = defineProps<Props>();
 
 // Debug: ver qué datos llegan
-console.log('Cursos cargados:', props.courses.map(c => ({ 
-    id: c.id, 
-    title: c.title, 
-    status: c.status, 
-    tipo: typeof c.status 
-})));
+console.log(
+    'Cursos cargados:',
+    props.courses.map((c) => ({
+        id: c.id,
+        title: c.title,
+        status: c.status,
+        tipo: typeof c.status,
+    })),
+);
 
 const getStatusBadge = (status: number) => {
     if (status === 1) return 'Borrador';
@@ -57,7 +60,9 @@ const getStatusBadge = (status: number) => {
     return 'Borrador';
 };
 
-const getStatusVariant = (status: number): 'default' | 'secondary' | 'destructive' => {
+const getStatusVariant = (
+    status: number,
+): 'default' | 'secondary' | 'destructive' => {
     if (status === 3) return 'default'; // Publicado - verde
     if (status === 2) return 'secondary'; // En revisión - gris
     return 'secondary'; // Borrador - gris
@@ -65,12 +70,16 @@ const getStatusVariant = (status: number): 'default' | 'secondary' | 'destructiv
 
 const publishCourse = (courseId: number) => {
     if (confirm('¿Estás seguro de publicar este curso?')) {
-        router.put(`/admin/courses/${courseId}/publish`, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                // Curso publicado
+        router.put(
+            `/admin/courses/${courseId}/publish`,
+            {},
+            {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // Curso publicado
+                },
             },
-        });
+        );
     }
 };
 
@@ -84,10 +93,10 @@ const breadcrumbs = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head title="Mis Cursos" />
 
-        <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="mx-auto max-w-7xl p-4 sm:p-6 lg:p-8">
             <Card>
                 <CardHeader>
-                    <div class="flex justify-between items-center">
+                    <div class="flex items-center justify-between">
                         <CardTitle>Gestión de Cursos</CardTitle>
                         <Button as-child>
                             <Link href="/admin/courses/create">
@@ -98,9 +107,16 @@ const breadcrumbs = [
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div v-if="courses.length === 0" class="text-center py-12 text-muted-foreground">
-                        <p class="text-lg font-medium mb-2">No tienes cursos creados</p>
-                        <p class="text-sm">Crea tu primer curso para comenzar</p>
+                    <div
+                        v-if="courses.length === 0"
+                        class="py-12 text-center text-muted-foreground"
+                    >
+                        <p class="mb-2 text-lg font-medium">
+                            No tienes cursos creados
+                        </p>
+                        <p class="text-sm">
+                            Crea tu primer curso para comenzar
+                        </p>
                     </div>
                     <Table v-else>
                         <TableHeader>
@@ -111,71 +127,104 @@ const breadcrumbs = [
                                 <TableHead>Precio</TableHead>
                                 <TableHead>Secciones</TableHead>
                                 <TableHead>Estado</TableHead>
-                                <TableHead class="text-right">Acciones</TableHead>
+                                <TableHead class="text-right"
+                                    >Acciones</TableHead
+                                >
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow v-for="course in courses" :key="course.id">
+                            <TableRow
+                                v-for="course in courses"
+                                :key="course.id"
+                            >
                                 <TableCell>
                                     <div class="flex items-center gap-3">
                                         <div
                                             v-if="course.image_path"
-                                            class="w-12 h-12 rounded overflow-hidden bg-muted flex-shrink-0"
+                                            class="h-12 w-12 flex-shrink-0 overflow-hidden rounded bg-muted"
                                         >
                                             <img
                                                 :src="`/storage/${course.image_path}`"
                                                 :alt="course.title"
-                                                class="w-full h-full object-cover"
+                                                class="h-full w-full object-cover"
                                             />
                                         </div>
                                         <div
                                             v-else
-                                            class="w-12 h-12 rounded bg-muted flex items-center justify-center flex-shrink-0"
+                                            class="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded bg-muted"
                                         >
-                                            <Eye class="h-5 w-5 text-muted-foreground" />
+                                            <Eye
+                                                class="h-5 w-5 text-muted-foreground"
+                                            />
                                         </div>
                                         <div>
-                                            <div class="font-medium">{{ course.title }}</div>
-                                            <div class="text-sm text-muted-foreground line-clamp-1">
+                                            <div class="font-medium">
+                                                {{ course.title }}
+                                            </div>
+                                            <div
+                                                class="line-clamp-1 text-sm text-muted-foreground"
+                                            >
                                                 {{ course.subtitle }}
                                             </div>
                                         </div>
                                     </div>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline">{{ course.category.name }}</Badge>
+                                    <Badge variant="outline">{{
+                                        course.category.name
+                                    }}</Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge variant="outline">{{ course.level.name }}</Badge>
+                                    <Badge variant="outline">{{
+                                        course.level.name
+                                    }}</Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <span class="font-semibold">${{ course.price }}</span>
+                                    <span class="font-semibold"
+                                        >${{ course.price }}</span
+                                    >
                                 </TableCell>
                                 <TableCell class="text-center">
-                                    <Badge variant="secondary">{{ course.sections_count }}</Badge>
+                                    <Badge variant="secondary">{{
+                                        course.sections_count
+                                    }}</Badge>
                                 </TableCell>
                                 <TableCell>
-                                    <Badge :variant="getStatusVariant(course.status)">
+                                    <Badge
+                                        :variant="
+                                            getStatusVariant(course.status)
+                                        "
+                                    >
                                         {{ getStatusBadge(course.status) }}
                                     </Badge>
                                 </TableCell>
                                 <TableCell class="text-right">
                                     <div class="flex justify-end gap-2">
-                                        <Button 
+                                        <Button
                                             v-if="course.status !== 3"
-                                            variant="default" 
+                                            variant="default"
                                             size="sm"
                                             @click="publishCourse(course.id)"
                                             title="Publicar curso"
                                         >
                                             <CheckCircle class="h-4 w-4" />
                                         </Button>
-                                        <Button variant="outline" size="sm" as-child>
-                                            <Link :href="`/admin/courses/${course.id}/edit`">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            as-child
+                                        >
+                                            <Link
+                                                :href="`/admin/courses/${course.id}/edit`"
+                                            >
                                                 <Pencil class="h-4 w-4" />
                                             </Link>
                                         </Button>
-                                        <Button variant="destructive" size="sm" as-child>
+                                        <Button
+                                            variant="destructive"
+                                            size="sm"
+                                            as-child
+                                        >
                                             <Link
                                                 :href="`/admin/courses/${course.id}`"
                                                 method="delete"

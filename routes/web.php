@@ -32,11 +32,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard con redirección según rol
     Route::get('/dashboard', function () {
         $user = auth()->user();
-        
+
         if ($user->hasRole('student')) {
             return app(StudentDashboardController::class)->index();
         }
-        
+
         // Dashboard para admin/teacher
         return Inertia::render('Dashboard');
     })->name('dashboard');

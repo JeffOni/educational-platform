@@ -16,7 +16,7 @@ class CourseController extends Controller
         }
 
         $hasPurchased = false;
-        
+
         if (auth()->check()) {
             $hasPurchased = auth()->user()->purchases()
                 ->where('course_id', $course->id)

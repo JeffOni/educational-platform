@@ -1,8 +1,8 @@
 <?php
 
-require __DIR__.'/vendor/autoload.php';
+require __DIR__ . '/vendor/autoload.php';
 
-$app = require_once __DIR__.'/bootstrap/app.php';
+$app = require_once __DIR__ . '/bootstrap/app.php';
 $app->make('Illuminate\Contracts\Console\Kernel')->bootstrap();
 
 $section = App\Models\Section::first();
@@ -22,11 +22,11 @@ try {
         'duration' => 300,
         'is_preview' => false,
     ]);
-    
+
     echo "✓ Lección creada exitosamente!\n";
     echo "Lesson ID: {$lesson->id}\n";
     echo "Lesson Name: {$lesson->name}\n";
-    
+
 } catch (Exception $e) {
     echo "✗ Error: " . $e->getMessage() . "\n";
 }
