@@ -22,6 +22,7 @@ import {
     BookOpen,
     Folder,
     GraduationCap,
+    Layers,
     LayoutGrid,
     MessageCircle,
     MonitorPlay,
@@ -66,6 +67,11 @@ const mainNavItems = computed<NavItem[]>(() => {
             title: 'Categorías',
             href: '/admin/categories',
             icon: Tags,
+        });
+        items.push({
+            title: 'Niveles',
+            href: '/admin/levels',
+            icon: Layers,
         });
         items.push({
             title: 'Estadísticas',

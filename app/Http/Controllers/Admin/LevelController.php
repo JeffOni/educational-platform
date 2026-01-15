@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Level;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 
 class LevelController extends Controller
@@ -14,7 +15,7 @@ class LevelController extends Controller
         $levels = Level::withCount('courses')
             ->orderBy('name')
             ->get();
-        
+
         return Inertia::render('Admin/Levels/Index', [
             'levels' => $levels
         ]);
@@ -33,6 +34,7 @@ class LevelController extends Controller
 
         Level::create([
             'name' => $request->name,
+            'slug' => Str::slug($request->name),
         ]);
 
         return redirect()->route('admin.levels.index')
@@ -54,6 +56,7 @@ class LevelController extends Controller
 
         $level->update([
             'name' => $request->name,
+            'slug' => Str::slug($request->name),
         ]);
 
         return redirect()->route('admin.levels.index')

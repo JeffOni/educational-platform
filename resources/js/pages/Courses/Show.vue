@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { login, register } from '@/routes';
+import { ShoppingCart } from 'lucide-vue-next';
 
 const props = defineProps<{
     course: any;
@@ -8,6 +9,12 @@ const props = defineProps<{
 }>();
 
 const totalLessons = props.course.sections.reduce((acc: number, section: any) => acc + section.lessons.length, 0);
+
+const addToCart = () => {
+    router.post(`/cart/add/${props.course.id}`, {}, {
+        preserveScroll: true,
+    });
+};
 </script>
 
 <template>
@@ -74,18 +81,28 @@ const totalLessons = props.course.sections.reduce((acc: number, section: any) =>
                             Ir al Curso →
                         </Link>
                     </template>
-                    <template v-else-if="$page.props.auth.user">
-                        <form method="POST" :action="'/student/courses/' + course.id + '/purchase'">
-                            <input type="hidden" name="_token" :value="$page.props.csrf_token" />
-                            <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg">
-                                Comprar Ahora
-                            </button>
-                        </form>
-                    </template>
                     <template v-else>
-                        <Link :href="login()" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-white text-center py-4 rounded-xl font-bold text-lg transition shadow-lg">
-                            Inicia Sesión para Comprar
-                        </Link>
+                        <div class="space-y-3">
+                            <button
+                                @click="addToCart"
+                                class="w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white py-4 rounded-xl font-bold text-lg transition shadow-lg flex items-center justify-center gap-2"
+                            >
+                                <ShoppingCart :size="20" />
+                                Agregar al Carrito
+                            </button>
+                            <p class="text-center text-sm text-gray-500 dark:text-gray-400">
+                                o
+                            </p>
+                            <form v-if="$page.props.auth.user" method="POST" :action="'/student/courses/' + course.id + '/purchase'">
+                                <input type="hidden" name="_token" :value="$page.props.csrf_token" />
+                                <button type="submit" class="w-full bg-white dark:bg-gray-800 border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 py-4 rounded-xl font-bold text-lg transition hover:bg-indigo-50 dark:hover:bg-gray-700">
+                                    Comprar Ahora
+                                </button>
+                            </form>
+                            <Link v-else :href="login()" class="block w-full bg-white dark:bg-gray-800 border-2 border-indigo-600 text-indigo-600 dark:text-indigo-400 text-center py-4 rounded-xl font-bold text-lg transition hover:bg-indigo-50 dark:hover:bg-gray-700">
+                                Inicia Sesión para Comprar
+                            </Link>
+                        </div>
                     </template>
 
                     <div class="mt-6 space-y-3 text-sm text-gray-600 dark:text-gray-400">

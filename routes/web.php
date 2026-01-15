@@ -22,13 +22,25 @@ use App\Http\Controllers\Student\LessonController as StudentLessonController;
 use App\Http\Controllers\Student\QuestionController as StudentQuestionController;
 use App\Http\Controllers\Student\LessonResourceController as StudentLessonResourceController;
 use App\Http\Controllers\Student\AssignmentSubmissionController;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\CheckoutController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Rutas públicas de cursos
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 
+// Rutas del carrito (disponibles para todos)
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add/{course}', [CartController::class, 'add'])->name('cart.add');
+Route::delete('/cart/remove/{rawId}', [CartController::class, 'remove'])->name('cart.remove');
+Route::delete('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+Route::get('/cart/count', [CartController::class, 'count'])->name('cart.count');
+
 Route::middleware(['auth', 'verified'])->group(function () {
+    // Checkout (solo autenticados)
+    Route::post('/checkout', [CheckoutController::class, 'process'])->name('checkout.process');
+
     // Dashboard con redirección según rol
     Route::get('/dashboard', function () {
         $user = auth()->user();

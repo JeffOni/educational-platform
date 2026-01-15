@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { dashboard, login, register } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
+import axios from 'axios';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import {
@@ -10,6 +11,7 @@ import {
     Globe,
     Play,
     Shield,
+    ShoppingCart,
     Sparkles,
     Star,
     TrendingUp,
@@ -46,8 +48,17 @@ const props = defineProps<Props>();
 const heroTitle = ref<HTMLElement | null>(null);
 const heroSubtitle = ref<HTMLElement | null>(null);
 const heroButtons = ref<HTMLElement | null>(null);
+const cartCount = ref(0);
 
-onMounted(() => {
+onMounted(async () => {
+    // Cargar contador del carrito
+    try {
+        const response = await axios.get('/cart/count');
+        cartCount.value = response.data.count;
+    } catch (error) {
+        console.error('Error loading cart count:', error);
+    }
+
     const tl = gsap.timeline();
 
     tl.from(heroTitle.value, {
@@ -190,6 +201,20 @@ const stats = [
                     </span>
                 </div>
                 <div class="flex items-center gap-4">
+                    <!-- Cart Icon -->
+                    <Link
+                        href="/cart"
+                        class="relative flex items-center gap-2 font-semibold transition hover:text-indigo-600 dark:hover:text-indigo-400"
+                    >
+                        <ShoppingCart :size="20" />
+                        <span
+                            v-if="cartCount > 0"
+                            class="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
+                        >
+                            {{ cartCount }}
+                        </span>
+                    </Link>
+
                     <Link
                         v-if="$page.props.auth.user"
                         :href="dashboard()"
@@ -693,8 +718,4 @@ const stats = [
         linear-gradient(
             to bottom,
             rgba(255, 255, 255, 0.1) 1px,
-            transparent 1px
-        );
-    background-size: 40px 40px;
-}
-</style>
+  
