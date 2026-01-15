@@ -718,4 +718,8 @@ const stats = [
         linear-gradient(
             to bottom,
             rgba(255, 255, 255, 0.1) 1px,
-  
+            transparent 1px
+        );
+    background-size: 40px 40px;
+}
+</style>
