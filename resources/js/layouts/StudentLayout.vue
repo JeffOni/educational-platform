@@ -179,7 +179,9 @@ const userInitials = computed(() => {
                                     size="icon"
                                     class="relative rounded-xl hover:bg-gray-100"
                                 >
-                                    <ShoppingCart class="h-5 w-5 text-gray-600" />
+                                    <ShoppingCart
+                                        class="h-5 w-5 text-gray-600"
+                                    />
                                     <span
                                         v-if="$page.props.cartCount > 0"
                                         class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white"

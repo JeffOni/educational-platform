@@ -13,7 +13,7 @@ class UserController extends Controller
     public function index()
     {
         $users = User::with('roles')->paginate(10);
-        
+
         return Inertia::render('Admin/Users/Index', [
             'users' => $users
         ]);
@@ -22,7 +22,7 @@ class UserController extends Controller
     public function create()
     {
         $roles = Role::all();
-        
+
         return Inertia::render('Admin/Users/Create', [
             'roles' => $roles
         ]);
@@ -59,7 +59,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $roles = Role::all();
-        
+
         return Inertia::render('Admin/Users/Edit', [
             'user' => $user->load('roles'),
             'roles' => $roles
@@ -91,7 +91,7 @@ class UserController extends Controller
             $request->validate([
                 'password' => 'required|string|min:8|confirmed',
             ]);
-            
+
             $user->update([
                 'password' => bcrypt($request->password),
             ]);

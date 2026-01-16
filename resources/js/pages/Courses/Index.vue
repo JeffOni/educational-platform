@@ -1,15 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
-import { BookOpen, ChevronDown, Filter, Search, Star } from 'lucide-vue-next';
+import { BookOpen, Search } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
-import { Button } from '@/components/ui/button';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 
 interface Teacher {
     id: number;
@@ -97,7 +89,10 @@ const handleSearch = () => {
             <div
                 class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"
             >
-                <Link href="/" class="flex items-center gap-2 text-2xl font-bold">
+                <Link
+                    href="/"
+                    class="flex items-center gap-2 text-2xl font-bold"
+                >
                     <div
                         class="rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 p-2 text-white"
                     >
@@ -148,7 +143,9 @@ const handleSearch = () => {
             </div>
 
             <!-- Filters -->
-            <div class="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg">
+            <div
+                class="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg"
+            >
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
                     <!-- Search -->
                     <div class="md:col-span-2">
@@ -191,15 +188,22 @@ const handleSearch = () => {
                         >
                             <option value="latest">Más recientes</option>
                             <option value="popular">Más populares</option>
-                            <option value="price_low">Precio: Menor a Mayor</option>
-                            <option value="price_high">Precio: Mayor a Menor</option>
+                            <option value="price_low">
+                                Precio: Menor a Mayor
+                            </option>
+                            <option value="price_high">
+                                Precio: Mayor a Menor
+                            </option>
                         </select>
                     </div>
                 </div>
             </div>
 
             <!-- Courses Grid -->
-            <div v-if="courses.data.length > 0" class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+            <div
+                v-if="courses.data.length > 0"
+                class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
+            >
                 <Link
                     :href="`/courses/${course.id}`"
                     v-for="course in courses.data"
@@ -242,13 +246,19 @@ const handleSearch = () => {
                             <div
                                 class="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-indigo-600 to-purple-600 font-bold text-white shadow-lg"
                             >
-                                {{ course.teacher.name.charAt(0).toUpperCase() }}
+                                {{
+                                    course.teacher.name.charAt(0).toUpperCase()
+                                }}
                             </div>
                             <div>
-                                <div class="text-sm font-semibold text-gray-900">
+                                <div
+                                    class="text-sm font-semibold text-gray-900"
+                                >
                                     {{ course.teacher.name }}
                                 </div>
-                                <div class="text-xs text-gray-500">Instructor</div>
+                                <div class="text-xs text-gray-500">
+                                    Instructor
+                                </div>
                             </div>
                         </div>
 
@@ -296,7 +306,10 @@ const handleSearch = () => {
             </div>
 
             <!-- Pagination -->
-            <div v-if="courses.last_page > 1" class="mt-12 flex justify-center gap-2">
+            <div
+                v-if="courses.last_page > 1"
+                class="mt-12 flex justify-center gap-2"
+            >
                 <Link
                     v-for="link in courses.links"
                     :key="link.label"
