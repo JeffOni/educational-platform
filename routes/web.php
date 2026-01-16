@@ -28,6 +28,7 @@ use App\Http\Controllers\CheckoutController;
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Rutas públicas de cursos
+Route::get('/courses', [CourseController::class, 'index'])->name('courses.index');
 Route::get('/courses/{course}', [CourseController::class, 'show'])->name('courses.show');
 
 // Rutas del carrito (disponibles para todos)

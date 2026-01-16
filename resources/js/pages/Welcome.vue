@@ -424,7 +424,7 @@ const stats = [
                         </p>
                     </div>
                     <Link
-                        href="#"
+                        href="/courses"
                         class="group inline-flex items-center gap-2 font-bold text-indigo-600 transition-all hover:gap-3 dark:text-indigo-400"
                     >
                         Ver todos los cursos

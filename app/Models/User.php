@@ -23,7 +23,12 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'student_type',
     ];
+
+    // Tipos de estudiante
+    const STUDENT_EXTERNAL = 'external'; // Estudiante que solo compra cursos
+    const STUDENT_INTERNAL = 'internal'; // Estudiante de institución con tareas
 
     /**
      * The attributes that should be hidden for serialization.
@@ -49,6 +54,22 @@ class User extends Authenticatable
             'password' => 'hashed',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    // Helper methods para tipo de estudiante
+    public function isExternalStudent()
+    {
+        return $this->student_type === self::STUDENT_EXTERNAL;
+    }
+
+    public function isInternalStudent()
+    {
+        return $this->student_type === self::STUDENT_INTERNAL;
+    }
+
+    public function canSubmitAssignments()
+    {
+        return $this->student_type === self::STUDENT_INTERNAL;
     }
 
     // Relaciones

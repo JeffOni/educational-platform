@@ -55,21 +55,23 @@ class CartController extends Controller
         }
 
         // Verificar si ya está en el carrito
-        if (Cart::has($course->id)) {
+        $cartItem = Cart::get($course->id);
+
+        if ($cartItem) {
             return redirect()->back()->with('info', 'Este curso ya está en tu carrito.');
         }
 
         // Agregar al carrito
-        Cart::add([
-            'id' => $course->id,
-            'name' => $course->title,
-            'price' => $course->price,
-            'quantity' => 1,
-            'attributes' => [
+        Cart::add(
+            $course->id,
+            $course->title,
+            $course->price,
+            1,
+            [
                 'subtitle' => $course->subtitle,
                 'image_path' => $course->image_path,
             ]
-        ]);
+        );
 
         return redirect()->back()->with('success', 'Curso agregado al carrito.');
     }

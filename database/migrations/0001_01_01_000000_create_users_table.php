@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->enum('student_type', ['external', 'internal'])->nullable()->comment('external: solo acceso a contenido | internal: puede subir tareas');
             $table->rememberToken();
             $table->timestamps();
         });

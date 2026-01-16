@@ -34,6 +34,7 @@ class CreateNewUser implements CreatesNewUsers
             'name' => $input['name'],
             'email' => $input['email'],
             'password' => $input['password'],
+            'student_type' => User::STUDENT_EXTERNAL, // Auto-asignar como estudiante externo
         ]);
 
         // Asignar automáticamente el rol de estudiante

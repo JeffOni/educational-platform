@@ -17,8 +17,10 @@ import {
     LayoutDashboard,
     LogOut,
     Menu,
+    Plus,
     Search,
     Settings,
+    ShoppingCart,
     User,
     X,
 } from 'lucide-vue-next';
@@ -73,7 +75,7 @@ const userInitials = computed(() => {
 
         <!-- Modern Floating Header -->
         <header class="fixed top-0 right-0 left-0 z-50">
-            <div class="mx-auto max-w-7xl px-4 pt-6">
+            <div class="mx-auto max-w-7xl px-6 pt-6">
                 <div
                     class="rounded-2xl border border-white/20 bg-white/80 shadow-xl shadow-black/5 backdrop-blur-xl"
                 >
@@ -169,6 +171,23 @@ const userInitials = computed(() => {
                                     ></span>
                                 </span>
                             </Button>
+
+                            <!-- Shopping Cart -->
+                            <Link href="/cart">
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    class="relative rounded-xl hover:bg-gray-100"
+                                >
+                                    <ShoppingCart class="h-5 w-5 text-gray-600" />
+                                    <span
+                                        v-if="$page.props.cartCount > 0"
+                                        class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white"
+                                    >
+                                        {{ $page.props.cartCount }}
+                                    </span>
+                                </Button>
+                            </Link>
 
                             <!-- User Menu -->
                             <DropdownMenu>
@@ -308,7 +327,7 @@ const userInitials = computed(() => {
         </header>
 
         <!-- Main Content with proper spacing for fixed header -->
-        <main class="px-4 pt-32 pb-8">
+        <main class="px-6 pt-32 pb-8">
             <div class="mx-auto max-w-7xl">
                 <slot />
             </div>

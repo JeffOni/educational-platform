@@ -96,249 +96,245 @@ const getDueDateColor = (date: string) => {
     <Head title="Mi Dashboard" />
 
     <StudentLayout>
-        <div class="">
-            <div class="">
-                <!-- Header -->
-                <div class="mb-8">
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        ¡Bienvenido de nuevo! 👋
-                    </h1>
-                    <p class="mt-2 text-gray-600">
-                        Continúa tu aprendizaje y alcanza tus metas
-                    </p>
-                </div>
+        <!-- Header -->
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">
+                ¡Bienvenido de nuevo! 👋
+            </h1>
+            <p class="mt-2 text-gray-600">
+                Continúa tu aprendizaje y alcanza tus metas
+            </p>
+        </div>
 
-                <!-- Stats Cards -->
-                <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
-                    <Card>
-                        <CardHeader class="pb-3">
-                            <div class="flex items-center justify-between">
-                                <CardTitle
-                                    class="text-sm font-medium text-gray-600"
-                                >
-                                    Cursos Activos
-                                </CardTitle>
-                                <BookOpen class="h-5 w-5 text-blue-600" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div class="text-3xl font-bold text-gray-900">
-                                {{ stats.total_courses }}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader class="pb-3">
-                            <div class="flex items-center justify-between">
-                                <CardTitle
-                                    class="text-sm font-medium text-gray-600"
-                                >
-                                    Completados
-                                </CardTitle>
-                                <CheckCircle2 class="h-5 w-5 text-green-600" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div class="text-3xl font-bold text-gray-900">
-                                {{ stats.completed_courses }}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader class="pb-3">
-                            <div class="flex items-center justify-between">
-                                <CardTitle
-                                    class="text-sm font-medium text-gray-600"
-                                >
-                                    Horas Aprendidas
-                                </CardTitle>
-                                <Clock class="h-5 w-5 text-purple-600" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div class="text-3xl font-bold text-gray-900">
-                                {{ stats.total_hours }}
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader class="pb-3">
-                            <div class="flex items-center justify-between">
-                                <CardTitle
-                                    class="text-sm font-medium text-gray-600"
-                                >
-                                    Certificados
-                                </CardTitle>
-                                <Award class="h-5 w-5 text-yellow-600" />
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div class="text-3xl font-bold text-gray-900">
-                                {{ stats.certificates }}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
-                    <!-- Main Content -->
-                    <div class="space-y-6 lg:col-span-2">
-                        <!-- Continue Learning -->
-                        <Card>
-                            <CardHeader>
-                                <CardTitle class="flex items-center gap-2">
-                                    <TrendingUp class="h-5 w-5" />
-                                    Continuar Aprendiendo
-                                </CardTitle>
-                                <CardDescription>
-                                    Retoma donde lo dejaste
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div
-                                    v-if="enrolledCourses.length === 0"
-                                    class="py-12 text-center"
-                                >
-                                    <BookOpen
-                                        class="mx-auto h-16 w-16 text-gray-300"
-                                    />
-                                    <p class="mt-4 text-gray-600">
-                                        Aún no estás inscrito en ningún curso
-                                    </p>
-                                    <Button
-                                        class="mt-4"
-                                        @click="router.visit('/')"
-                                    >
-                                        Explorar Cursos
-                                    </Button>
-                                </div>
-
-                                <div v-else class="space-y-4">
-                                    <div
-                                        v-for="course in enrolledCourses"
-                                        :key="course.id"
-                                        class="flex cursor-pointer gap-4 rounded-lg border p-4 transition-all hover:shadow-md"
-                                        @click="goToCourse(course.id)"
-                                    >
-                                        <img
-                                            :src="`/storage/${course.image_path}`"
-                                            :alt="course.title"
-                                            class="h-24 w-32 rounded-lg object-cover"
-                                        />
-                                        <div class="flex-1">
-                                            <h3
-                                                class="font-semibold text-gray-900"
-                                            >
-                                                {{ course.title }}
-                                            </h3>
-                                            <p class="text-sm text-gray-600">
-                                                {{ course.instructor.name }}
-                                            </p>
-                                            <div class="mt-2">
-                                                <div
-                                                    class="flex items-center justify-between text-sm"
-                                                >
-                                                    <span class="text-gray-600">
-                                                        {{
-                                                            course.completed_lessons
-                                                        }}/{{
-                                                            course.total_lessons
-                                                        }}
-                                                        lecciones
-                                                    </span>
-                                                    <span
-                                                        class="font-medium text-blue-600"
-                                                    >
-                                                        {{ course.progress }}%
-                                                    </span>
-                                                </div>
-                                                <Progress
-                                                    :model-value="
-                                                        course.progress
-                                                    "
-                                                    class="mt-2"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+        <!-- Stats Cards -->
+        <div class="mb-8 grid grid-cols-1 gap-4 md:grid-cols-4">
+            <Card>
+                <CardHeader class="pb-3">
+                    <div class="flex items-center justify-between">
+                        <CardTitle
+                            class="text-sm font-medium text-gray-600"
+                        >
+                            Cursos Activos
+                        </CardTitle>
+                        <BookOpen class="h-5 w-5 text-blue-600" />
                     </div>
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold text-gray-900">
+                        {{ stats.total_courses }}
+                    </div>
+                </CardContent>
+            </Card>
 
-                    <!-- Sidebar -->
-                    <div class="space-y-6">
-                        <!-- Pending Assignments -->
-                        <Card>
-                            <CardHeader>
-                                <CardTitle class="flex items-center gap-2">
-                                    <Calendar class="h-5 w-5" />
-                                    Tareas Pendientes
-                                </CardTitle>
-                                <CardDescription>
-                                    Próximas entregas
-                                </CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <div
-                                    v-if="pendingAssignments.length === 0"
-                                    class="py-8 text-center"
-                                >
-                                    <CheckCircle2
-                                        class="mx-auto h-12 w-12 text-green-300"
-                                    />
-                                    <p class="mt-2 text-sm text-gray-600">
-                                        ¡Todo al día!
-                                    </p>
-                                </div>
+            <Card>
+                <CardHeader class="pb-3">
+                    <div class="flex items-center justify-between">
+                        <CardTitle
+                            class="text-sm font-medium text-gray-600"
+                        >
+                            Completados
+                        </CardTitle>
+                        <CheckCircle2 class="h-5 w-5 text-green-600" />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold text-gray-900">
+                        {{ stats.completed_courses }}
+                    </div>
+                </CardContent>
+            </Card>
 
-                                <div v-else class="space-y-3">
-                                    <div
-                                        v-for="assignment in pendingAssignments"
-                                        :key="assignment.id"
-                                        class="rounded-lg border p-3 hover:bg-gray-50"
+            <Card>
+                <CardHeader class="pb-3">
+                    <div class="flex items-center justify-between">
+                        <CardTitle
+                            class="text-sm font-medium text-gray-600"
+                        >
+                            Horas Aprendidas
+                        </CardTitle>
+                        <Clock class="h-5 w-5 text-purple-600" />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold text-gray-900">
+                        {{ stats.total_hours }}
+                    </div>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader class="pb-3">
+                    <div class="flex items-center justify-between">
+                        <CardTitle
+                            class="text-sm font-medium text-gray-600"
+                        >
+                            Certificados
+                        </CardTitle>
+                        <Award class="h-5 w-5 text-yellow-600" />
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div class="text-3xl font-bold text-gray-900">
+                        {{ stats.certificates }}
+                    </div>
+                </CardContent>
+            </Card>
+        </div>
+
+        <div class="grid grid-cols-1 gap-8 lg:grid-cols-3">
+            <!-- Main Content -->
+            <div class="space-y-6 lg:col-span-2">
+                <!-- Continue Learning -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle class="flex items-center gap-2">
+                            <TrendingUp class="h-5 w-5" />
+                            Continuar Aprendiendo
+                        </CardTitle>
+                        <CardDescription>
+                            Retoma donde lo dejaste
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div
+                            v-if="enrolledCourses.length === 0"
+                            class="py-12 text-center"
+                        >
+                            <BookOpen
+                                class="mx-auto h-16 w-16 text-gray-300"
+                            />
+                            <p class="mt-4 text-gray-600">
+                                Aún no estás inscrito en ningún curso
+                            </p>
+                            <Button
+                                class="mt-4"
+                                @click="router.visit('/courses')"
+                            >
+                                Explorar Cursos
+                            </Button>
+                        </div>
+
+                        <div v-else class="space-y-4">
+                            <div
+                                v-for="course in enrolledCourses"
+                                :key="course.id"
+                                class="flex cursor-pointer gap-4 rounded-lg border p-4 transition-all hover:shadow-md"
+                                @click="goToCourse(course.id)"
+                            >
+                                <img
+                                    :src="`/storage/${course.image_path}`"
+                                    :alt="course.title"
+                                    class="h-24 w-32 rounded-lg object-cover"
+                                />
+                                <div class="flex-1">
+                                    <h3
+                                        class="font-semibold text-gray-900"
                                     >
+                                        {{ course.title }}
+                                    </h3>
+                                    <p class="text-sm text-gray-600">
+                                        {{ course.instructor.name }}
+                                    </p>
+                                    <div class="mt-2">
                                         <div
-                                            class="mb-2 flex items-start justify-between"
+                                            class="flex items-center justify-between text-sm"
                                         >
-                                            <h4
-                                                class="text-sm font-medium text-gray-900"
-                                            >
-                                                {{ assignment.title }}
-                                            </h4>
-                                            <Badge
-                                                :class="
-                                                    getDueDateColor(
-                                                        assignment.due_date,
-                                                    )
-                                                "
-                                                class="ml-2 shrink-0"
-                                            >
+                                            <span class="text-gray-600">
                                                 {{
-                                                    formatDueDate(
-                                                        assignment.due_date,
-                                                    )
+                                                    course.completed_lessons
+                                                }}/{{
+                                                    course.total_lessons
                                                 }}
-                                            </Badge>
+                                                lecciones
+                                            </span>
+                                            <span
+                                                class="font-medium text-blue-600"
+                                            >
+                                                {{ course.progress }}%
+                                            </span>
                                         </div>
-                                        <p class="text-xs text-gray-600">
-                                            {{
-                                                assignment.lesson.section.course
-                                                    .title
-                                            }}
-                                        </p>
-                                        <p class="text-xs text-gray-500">
-                                            {{ assignment.lesson.name }}
-                                        </p>
+                                        <Progress
+                                            :model-value="
+                                                course.progress
+                                            "
+                                            class="mt-2"
+                                        />
                                     </div>
                                 </div>
-                            </CardContent>
-                        </Card>
-                    </div>
-                </div>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-6">
+                <!-- Pending Assignments -->
+                <Card>
+                    <CardHeader>
+                        <CardTitle class="flex items-center gap-2">
+                            <Calendar class="h-5 w-5" />
+                            Tareas Pendientes
+                        </CardTitle>
+                        <CardDescription>
+                            Próximas entregas
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <div
+                            v-if="pendingAssignments.length === 0"
+                            class="py-8 text-center"
+                        >
+                            <CheckCircle2
+                                class="mx-auto h-12 w-12 text-green-300"
+                            />
+                            <p class="mt-2 text-sm text-gray-600">
+                                ¡Todo al día!
+                            </p>
+                        </div>
+
+                        <div v-else class="space-y-3">
+                            <div
+                                v-for="assignment in pendingAssignments"
+                                :key="assignment.id"
+                                class="rounded-lg border p-3 hover:bg-gray-50"
+                            >
+                                <div
+                                    class="mb-2 flex items-start justify-between"
+                                >
+                                    <h4
+                                        class="text-sm font-medium text-gray-900"
+                                    >
+                                        {{ assignment.title }}
+                                    </h4>
+                                    <Badge
+                                        :class="
+                                            getDueDateColor(
+                                                assignment.due_date,
+                                            )
+                                        "
+                                        class="ml-2 shrink-0"
+                                    >
+                                        {{
+                                            formatDueDate(
+                                                assignment.due_date,
+                                            )
+                                        }}
+                                    </Badge>
+                                </div>
+                                <p class="text-xs text-gray-600">
+                                    {{
+                                        assignment.lesson.section.course
+                                            .title
+                                    }}
+                                </p>
+                                <p class="text-xs text-gray-500">
+                                    {{ assignment.lesson.name }}
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     </StudentLayout>
