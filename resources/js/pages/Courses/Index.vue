@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PublicNavbar from '@/components/PublicNavbar.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { BookOpen, Search } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
@@ -82,53 +83,8 @@ const handleSearch = () => {
     <Head title="Todos los Cursos" />
 
     <div class="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-        <!-- Navbar -->
-        <nav
-            class="fixed top-0 z-50 w-full border-b border-gray-200/50 bg-white/80 backdrop-blur-lg"
-        >
-            <div
-                class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"
-            >
-                <Link
-                    href="/"
-                    class="flex items-center gap-2 text-2xl font-bold"
-                >
-                    <div
-                        class="rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 p-2 text-white"
-                    >
-                        <BookOpen :size="24" />
-                    </div>
-                    <span
-                        class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
-                    >
-                        EduPlatform
-                    </span>
-                </Link>
-
-                <div class="flex items-center gap-4">
-                    <Link
-                        href="/"
-                        class="font-medium text-gray-700 transition-colors hover:text-indigo-600"
-                    >
-                        Inicio
-                    </Link>
-                    <Link
-                        v-if="$page.props.auth?.user"
-                        href="/dashboard"
-                        class="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-2.5 font-bold text-white transition-all hover:scale-105"
-                    >
-                        Dashboard
-                    </Link>
-                    <Link
-                        v-else
-                        href="/login"
-                        class="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-2.5 font-bold text-white transition-all hover:scale-105"
-                    >
-                        Iniciar Sesión
-                    </Link>
-                </div>
-            </div>
-        </nav>
+        <!-- Navbar usando el nuevo componente -->
+        <PublicNavbar />
 
         <!-- Main Content -->
         <main class="mx-auto max-w-7xl px-6 pt-28 pb-16">
@@ -146,7 +102,7 @@ const handleSearch = () => {
             <div
                 class="mb-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-lg"
             >
-                <div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+                <div class="grid grid-cols-1 gap-4 md:grid-cols-5">
                     <!-- Search -->
                     <div class="md:col-span-2">
                         <div class="relative">
@@ -176,6 +132,23 @@ const handleSearch = () => {
                                 :value="category.id"
                             >
                                 {{ category.name }}
+                            </option>
+                        </select>
+                    </div>
+
+                    <!-- Level Filter -->
+                    <div>
+                        <select
+                            v-model="selectedLevel"
+                            class="w-full rounded-xl border border-gray-300 px-4 py-3 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:outline-none"
+                        >
+                            <option value="">Todos los niveles</option>
+                            <option
+                                v-for="level in levels"
+                                :key="level.id"
+                                :value="level.id"
+                            >
+                                {{ level.name }}
                             </option>
                         </select>
                     </div>

@@ -5,7 +5,9 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\User;
 use App\Models\Level;
+use App\Models\Family;
 use App\Models\Category;
+use App\Models\Subcategory;
 
 return new class extends Migration
 {
@@ -25,7 +27,9 @@ return new class extends Migration
             
             $table->foreignIdFor(User::class)->constrained()->onDelete('cascade');
             $table->foreignIdFor(Level::class)->nullable()->constrained()->onDelete('set null');
+            $table->foreignIdFor(Family::class)->nullable()->constrained()->onDelete('set null');
             $table->foreignIdFor(Category::class)->nullable()->constrained()->onDelete('set null');
+            $table->foreignIdFor(Subcategory::class)->nullable()->constrained()->onDelete('set null');
             
             $table->decimal('price', 8, 2)->nullable();
             

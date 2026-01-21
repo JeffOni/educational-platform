@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use App\Models\Course;
 use App\Models\Category;
+use App\Models\Family;
+use App\Models\Subcategory;
 use App\Models\Level;
 
 class CourseController extends Controller
@@ -34,7 +36,9 @@ class CourseController extends Controller
     public function create()
     {
         return Inertia::render('Admin/Courses/Create', [
-            'categories' => Category::orderBy('name')->get(),
+            'families' => Family::where('is_active', true)->orderBy('name')->get(),
+            'categories' => Category::with('family')->where('is_active', true)->orderBy('name')->get(),
+            'subcategories' => Subcategory::with('category')->where('is_active', true)->orderBy('name')->get(),
             'levels' => Level::orderBy('name')->get(),
         ]);
     }
@@ -46,7 +50,9 @@ class CourseController extends Controller
             'subtitle' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
-            'category_id' => 'required|exists:categories,id',
+            'family_id' => 'nullable|exists:families,id',
+            'category_id' => 'nullable|exists:categories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
             'level_id' => 'required|exists:levels,id',
             'image' => 'nullable|image|max:2048',
         ]);
@@ -56,7 +62,9 @@ class CourseController extends Controller
             'subtitle' => $request->subtitle,
             'description' => $request->description,
             'price' => $request->price,
+            'family_id' => $request->family_id,
             'category_id' => $request->category_id,
+            'subcategory_id' => $request->subcategory_id,
             'level_id' => $request->level_id,
             'slug' => Str::slug($request->title),
             'user_id' => auth()->id(),
@@ -81,7 +89,9 @@ class CourseController extends Controller
 
         return Inertia::render('Admin/Courses/Edit', [
             'course' => $course->load('sections.lessons.resources', 'sections.lessons.assignments'),
-            'categories' => Category::all(),
+            'families' => Family::where('is_active', true)->orderBy('name')->get(),
+            'categories' => Category::with('family')->where('is_active', true)->orderBy('name')->get(),
+            'subcategories' => Subcategory::with('category')->where('is_active', true)->orderBy('name')->get(),
             'levels' => Level::all(),
         ]);
     }
@@ -97,13 +107,15 @@ class CourseController extends Controller
             'subtitle' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric',
-            'category_id' => 'required|exists:categories,id',
+            'family_id' => 'nullable|exists:families,id',
+            'category_id' => 'nullable|exists:categories,id',
+            'subcategory_id' => 'nullable|exists:subcategories,id',
             'level_id' => 'required|exists:levels,id',
             'status' => 'required|integer|in:1,2,3',
             'image' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only(['title', 'subtitle', 'description', 'price', 'category_id', 'level_id', 'status']);
+        $data = $request->only(['title', 'subtitle', 'description', 'price', 'family_id', 'category_id', 'subcategory_id', 'level_id', 'status']);
 
         if ($request->hasFile('image')) {
             if ($course->image_path) {

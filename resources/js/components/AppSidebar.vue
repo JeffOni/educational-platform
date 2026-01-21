@@ -64,8 +64,18 @@ const mainNavItems = computed<NavItem[]>(() => {
             icon: Users,
         });
         items.push({
+            title: 'Familias',
+            href: '/admin/families',
+            icon: Layers,
+        });
+        items.push({
             title: 'Categorías',
             href: '/admin/categories',
+            icon: Tags,
+        });
+        items.push({
+            title: 'Subcategorías',
+            href: '/admin/subcategories',
             icon: Tags,
         });
         items.push({

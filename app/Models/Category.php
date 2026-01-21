@@ -11,6 +11,26 @@ class Category extends Model
 
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'is_active' => 'boolean',
+    ];
+
+    // Relaciones
+    public function family()
+    {
+        return $this->belongsTo(Family::class);
+    }
+
+    public function subcategories()
+    {
+        return $this->hasMany(Subcategory::class);
+    }
+
+    public function activeSubcategories()
+    {
+        return $this->subcategories()->where('is_active', true);
+    }
+
     public function courses()
     {
         return $this->hasMany(Course::class);

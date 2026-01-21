@@ -39,6 +39,6 @@ class PurchaseController extends Controller
             'course_id' => $course->id,
         ]);
 
-        return redirect()->route('student.courses.show', $course)->with('success', '¡Curso adquirido exitosamente!');
+        return redirect()->route('student.courses.index')->with('success', '¡Curso adquirido exitosamente! Ya puedes acceder a tu curso.');
     }
 }

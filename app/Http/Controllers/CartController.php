@@ -84,7 +84,7 @@ class CartController extends Controller
 
     public function clear()
     {
-        Cart::clear();
+        Cart::clean();
         return redirect()->route('cart.index')->with('success', 'Carrito vaciado.');
     }
 

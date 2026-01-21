@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-use App\Models\Family;
+use App\Models\Category;
 
 return new class extends Migration {
     /**
@@ -11,9 +11,9 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        Schema::create('categories', function (Blueprint $table) {
+        Schema::create('subcategories', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Family::class)->nullable()->constrained()->onDelete('set null');
+            $table->foreignIdFor(Category::class)->constrained()->onDelete('cascade');
             $table->string('name');
             $table->string('slug')->unique();
 
@@ -27,6 +27,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('categories');
+        Schema::dropIfExists('subcategories');
     }
 };

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import PublicNavbar from '@/components/PublicNavbar.vue';
 import { dashboard, login, register } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
 import axios from 'axios';
@@ -11,7 +12,6 @@ import {
     Globe,
     Play,
     Shield,
-    ShoppingCart,
     Sparkles,
     Star,
     TrendingUp,
@@ -179,69 +179,8 @@ const stats = [
     <div
         class="min-h-screen bg-gradient-to-b from-gray-50 to-white font-sans text-gray-900 selection:bg-indigo-500 selection:text-white dark:from-gray-900 dark:to-gray-950 dark:text-white"
     >
-        <!-- Navbar Moderno -->
-        <nav
-            class="fixed top-0 z-50 w-full border-b border-gray-200/50 bg-white/80 backdrop-blur-lg dark:border-gray-800/50 dark:bg-gray-900/80"
-        >
-            <div
-                class="mx-auto flex max-w-7xl items-center justify-between px-6 py-4"
-            >
-                <div
-                    class="flex items-center gap-2 text-2xl font-bold tracking-tight"
-                >
-                    <div
-                        class="rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 p-2 text-white"
-                    >
-                        <BookOpen :size="24" />
-                    </div>
-                    <span
-                        class="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent"
-                    >
-                        EduPlatform
-                    </span>
-                </div>
-                <div class="flex items-center gap-4">
-                    <!-- Cart Icon -->
-                    <Link
-                        href="/cart"
-                        class="relative flex items-center gap-2 font-semibold transition hover:text-indigo-600 dark:hover:text-indigo-400"
-                    >
-                        <ShoppingCart :size="20" />
-                        <span
-                            v-if="cartCount > 0"
-                            class="absolute -top-2 -right-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-bold text-white"
-                        >
-                            {{ cartCount }}
-                        </span>
-                    </Link>
-
-                    <Link
-                        v-if="$page.props.auth.user"
-                        :href="dashboard()"
-                        class="flex items-center gap-2 font-semibold transition hover:text-indigo-600 dark:hover:text-indigo-400"
-                    >
-                        Dashboard
-                        <ArrowRight :size="16" />
-                    </Link>
-                    <template v-else>
-                        <Link
-                            :href="login()"
-                            class="font-semibold transition hover:text-indigo-600 dark:hover:text-indigo-400"
-                        >
-                            Iniciar Sesión
-                        </Link>
-                        <Link
-                            v-if="canRegister"
-                            :href="register()"
-                            class="flex items-center gap-2 rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-2.5 font-semibold text-white shadow-lg shadow-indigo-500/30 transition hover:from-indigo-700 hover:to-purple-700 hover:shadow-indigo-500/50"
-                        >
-                            <Sparkles :size="16" />
-                            Empezar Gratis
-                        </Link>
-                    </template>
-                </div>
-            </div>
-        </nav>
+        <!-- Navbar usando el nuevo componente -->
+        <PublicNavbar :cart-count="cartCount" :show-register="canRegister" />
 
         <!-- Hero Section Mejorado -->
         <header class="relative overflow-hidden pt-32 pb-24 lg:pt-48 lg:pb-40">

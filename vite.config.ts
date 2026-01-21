@@ -31,11 +31,10 @@ export default defineConfig({
         // que el navegador no pueda conectar al dev server desde 127.0.0.1.
         host: '127.0.0.1',
         port: 5173,
-        strictPort: false,
+        strictPort: false, // Permite usar otro puerto automáticamente si 5173 está ocupado
         hmr: {
             host: 'educational-platform.test',
-            port: 5173,
-            clientPort: 5173,
+            // No especificar port ni clientPort permite que HMR use el puerto asignado automáticamente
         },
     },
 });

@@ -13,8 +13,11 @@ use App\Http\Controllers\Admin\LessonAssignmentController;
 use App\Http\Controllers\Admin\AssignmentSubmissionController as AdminAssignmentSubmissionController;
 use App\Http\Controllers\Admin\QuestionController as AdminQuestionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\FamilyController;
 use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\SubcategoryController;
 use App\Http\Controllers\Admin\LevelController;
+use App\Http\Controllers\Api\TaxonomyController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\PurchaseController;
@@ -56,6 +59,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Rutas para Administradores y Profesores
     Route::middleware(['role:admin|teacher'])->prefix('admin')->name('admin.')->group(function () {
+        // Gestión de Taxonomía
+        Route::resource('families', FamilyController::class);
+        Route::resource('categories', CategoryController::class);
+        Route::resource('subcategories', SubcategoryController::class);
+
+        // Gestión de Cursos
         Route::resource('courses', AdminCourseController::class);
         Route::put('courses/{course}/publish', [AdminCourseController::class, 'publish'])->name('courses.publish');
 
@@ -92,6 +101,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('users', UserController::class);
         Route::resource('categories', CategoryController::class);
         Route::resource('levels', LevelController::class);
+
+        // API Endpoints para filtrado en cascada
+        Route::get('api/categories', [TaxonomyController::class, 'getCategoriesByFamily'])->name('api.categories');
+        Route::get('api/subcategories', [TaxonomyController::class, 'getSubcategoriesByCategory'])->name('api.subcategories');
     });
 
     // Rutas para Estudiantes

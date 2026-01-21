@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +34,7 @@ defineProps<Props>();
 
 const deleteUser = (id: number) => {
     if (confirm('¿Estás seguro de eliminar este usuario?')) {
-        router.delete(route('admin.users.destroy', id), {
+        router.delete(`/admin/users/${id}`, {
             preserveScroll: true,
         });
     }
@@ -63,7 +63,7 @@ const getStudentTypeVariant = (studentType: string | null): 'default' | 'seconda
                         Gestiona los usuarios del sistema
                     </p>
                 </div>
-                <Link :href="route('admin.users.create')">
+                <Link href="/admin/users/create">
                     <Button>
                         <UserPlus class="mr-2 h-4 w-4" />
                         Crear Usuario
@@ -102,7 +102,7 @@ const getStudentTypeVariant = (studentType: string | null): 'default' | 'seconda
                             </TableCell>
                             <TableCell class="text-right">
                                 <div class="flex justify-end gap-2">
-                                    <Link :href="route('admin.users.edit', user.id)">
+                                    <Link :href="`/admin/users/${user.id}/edit`">
                                         <Button variant="ghost" size="icon">
                                             <Edit class="h-4 w-4" />
                                         </Button>

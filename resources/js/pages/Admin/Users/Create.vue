@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -47,7 +47,7 @@ watch(selectedRole, (newRole) => {
 });
 
 const submit = () => {
-    form.post(route('admin.users.store'));
+    form.post('/admin/users');
 };
 </script>
 
@@ -57,7 +57,7 @@ const submit = () => {
     <AuthenticatedLayout>
         <div class="space-y-6 max-w-2xl">
             <div class="flex items-center gap-4">
-                <Link :href="route('admin.users.index')">
+                <Link href="/admin/users">
                     <Button variant="ghost" size="icon">
                         <ArrowLeft class="h-4 w-4" />
                     </Button>
@@ -198,7 +198,7 @@ const submit = () => {
                         </div>
 
                         <div class="flex justify-end gap-2 pt-4">
-                            <Link :href="route('admin.users.index')">
+                            <Link href="/admin/users">
                                 <Button variant="outline" type="button">
                                     Cancelar
                                 </Button>

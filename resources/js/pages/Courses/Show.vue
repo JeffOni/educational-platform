@@ -1,12 +1,22 @@
 <script setup lang="ts">
+import PublicNavbar from '@/components/PublicNavbar.vue';
+import FlashMessage from '@/components/FlashMessage.vue';
 import { login, register } from '@/routes';
-import { Head, Link, router } from '@inertiajs/vue3';
-import { ShoppingCart } from 'lucide-vue-next';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
+import { ShoppingCart, Check } from 'lucide-vue-next';
+import { ref, computed } from 'vue';
 
 const props = defineProps<{
     course: any;
     hasPurchased: boolean;
 }>();
+
+const page = usePage();
+const isAddingToCart = ref(false);
+const cartCount = computed(() => page.props.cartCount || 0);
+
+// Debug temporal
+console.log('hasPurchased:', props.hasPurchased);
 
 const totalLessons = props.course.sections.reduce(
     (acc: number, section: any) => acc + section.lessons.length,
@@ -14,11 +24,24 @@ const totalLessons = props.course.sections.reduce(
 );
 
 const addToCart = () => {
+    if (isAddingToCart.value) return;
+    
+    isAddingToCart.value = true;
+    
     router.post(
         `/cart/add/${props.course.id}`,
         {},
         {
             preserveScroll: true,
+            onSuccess: () => {
+                // Recargar el contador del carrito
+                setTimeout(() => {
+                    isAddingToCart.value = false;
+                }, 1000);
+            },
+            onError: () => {
+                isAddingToCart.value = false;
+            },
         },
     );
 };
@@ -27,37 +50,13 @@ const addToCart = () => {
 <template>
     <Head :title="course.title" />
 
+    <FlashMessage />
+
     <div
         class="min-h-screen bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-white"
     >
-        <!-- Navbar Simple -->
-        <nav
-            class="border-b border-gray-200 bg-white px-6 py-4 dark:border-gray-800 dark:bg-gray-950"
-        >
-            <div class="mx-auto flex max-w-7xl items-center justify-between">
-                <Link href="/" class="text-xl font-bold">EduPlatform</Link>
-                <div class="flex gap-4">
-                    <Link
-                        v-if="$page.props.auth.user"
-                        href="/dashboard"
-                        class="font-semibold transition hover:text-indigo-500"
-                        >Dashboard</Link
-                    >
-                    <template v-else>
-                        <Link
-                            :href="login()"
-                            class="font-semibold transition hover:text-indigo-500"
-                            >Iniciar Sesión</Link
-                        >
-                        <Link
-                            :href="register()"
-                            class="rounded-full bg-indigo-600 px-4 py-2 font-medium text-white transition hover:bg-indigo-700"
-                            >Registrarse</Link
-                        >
-                    </template>
-                </div>
-            </div>
-        </nav>
+        <!-- Navbar usando el nuevo componente -->
+        <PublicNavbar :cart-count="cartCount" />
 
         <!-- Hero del Curso -->
         <div
@@ -142,37 +141,33 @@ const addToCart = () => {
                         <div class="space-y-3">
                             <button
                                 @click="addToCart"
-                                class="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 py-4 text-lg font-bold text-white shadow-lg transition hover:from-indigo-700 hover:to-purple-700"
+                                :disabled="isAddingToCart"
+                                :class="[
+                                    'flex w-full items-center justify-center gap-2 rounded-xl py-4 text-lg font-bold text-white shadow-lg transition',
+                                    isAddingToCart
+                                        ? 'bg-green-600 cursor-not-allowed'
+                                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                                ]"
                             >
-                                <ShoppingCart :size="20" />
-                                Agregar al Carrito
+                                <component 
+                                    :is="isAddingToCart ? Check : ShoppingCart" 
+                                    :size="20"
+                                    :class="{ 'animate-bounce': isAddingToCart }"
+                                />
+                                {{ isAddingToCart ? '¡Agregado!' : 'Agregar al Carrito' }}
                             </button>
                             <p
                                 class="text-center text-sm text-gray-500 dark:text-gray-400"
                             >
                                 o
                             </p>
-                            <form
+                            <Link
                                 v-if="$page.props.auth.user"
-                                method="POST"
-                                :action="
-                                    '/student/courses/' +
-                                    course.id +
-                                    '/purchase'
-                                "
+                                href="/cart"
+                                class="block w-full rounded-xl border-2 border-indigo-600 bg-white py-4 text-center text-lg font-bold text-indigo-600 transition hover:bg-indigo-50 dark:bg-gray-800 dark:text-indigo-400 dark:hover:bg-gray-700"
                             >
-                                <input
-                                    type="hidden"
-                                    name="_token"
-                                    :value="$page.props.csrf_token"
-                                />
-                                <button
-                                    type="submit"
-                                    class="w-full rounded-xl border-2 border-indigo-600 bg-white py-4 text-lg font-bold text-indigo-600 transition hover:bg-indigo-50 dark:bg-gray-800 dark:text-indigo-400 dark:hover:bg-gray-700"
-                                >
-                                    Comprar Ahora
-                                </button>
-                            </form>
+                                Comprar Ahora
+                            </Link>
                             <Link
                                 v-else
                                 :href="login()"

@@ -6,49 +6,42 @@ import { Head, Link, router } from '@inertiajs/vue3';
 interface Family {
     id: number;
     name: string;
-}
-
-interface Category {
-    id: number;
-    name: string;
     slug: string;
     is_active: boolean;
-    family: Family | null;
-    subcategories_count: number;
-    courses_count: number;
+    categories_count: number;
 }
 
 interface Props {
-    categories: Category[];
+    families: Family[];
 }
 
 defineProps<Props>();
 
-const deleteCategory = (id: number) => {
-    if (confirm('¿Estás seguro de eliminar esta categoría?')) {
-        router.delete(admin.categories.destroy({ category: id }).url);
+const deleteFamily = (id: number) => {
+    if (confirm('¿Estás seguro de eliminar esta familia?')) {
+        router.delete(admin.families.destroy({ family: id }).url);
     }
 };
 </script>
 
 <template>
     <AppLayout>
-        <Head title="Gestión de Categorías" />
+        <Head title="Gestión de Familias" />
 
         <div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h1 class="text-3xl font-bold">Categorías</h1>
+                    <h1 class="text-3xl font-bold">Familias</h1>
                     <p class="mt-1 text-muted-foreground">
-                        Gestiona las categorías de contenido
+                        Gestiona las familias de contenido
                     </p>
                 </div>
                 <Link
-                    :href="admin.categories.create().url"
+                    :href="admin.families.create().url"
                     class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
                 >
-                    Nueva Categoría
+                    Nueva Familia
                 </Link>
             </div>
 
@@ -65,17 +58,7 @@ const deleteCategory = (id: number) => {
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                             >
-                                Familia
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                            >
-                                Subcategorías
-                            </th>
-                            <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                            >
-                                Cursos
+                                Categorías
                             </th>
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
@@ -90,37 +73,29 @@ const deleteCategory = (id: number) => {
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200 bg-white">
-                        <tr v-for="category in categories" :key="category.id">
+                        <tr v-for="family in families" :key="family.id">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="font-medium text-gray-900">
-                                    {{ category.name }}
+                                    {{ family.name }}
                                 </div>
                                 <div class="text-sm text-gray-500">
-                                    {{ category.slug }}
+                                    {{ family.slug }}
                                 </div>
                             </td>
-                            <td class="px-6 py-4 text-sm">
-                                {{ category.family?.name || '-' }}
-                            </td>
                             <td class="px-6 py-4 text-sm whitespace-nowrap">
-                                {{ category.subcategories_count }}
-                            </td>
-                            <td class="px-6 py-4 text-sm whitespace-nowrap">
-                                {{ category.courses_count }}
+                                {{ family.categories_count }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <span
                                     :class="[
                                         'inline-flex rounded-full px-2 text-xs leading-5 font-semibold',
-                                        category.is_active
+                                        family.is_active
                                             ? 'bg-green-100 text-green-800'
                                             : 'bg-red-100 text-red-800',
                                     ]"
                                 >
                                     {{
-                                        category.is_active
-                                            ? 'Activa'
-                                            : 'Inactiva'
+                                        family.is_active ? 'Activa' : 'Inactiva'
                                     }}
                                 </span>
                             </td>
@@ -129,8 +104,8 @@ const deleteCategory = (id: number) => {
                             >
                                 <Link
                                     :href="
-                                        admin.categories.edit({
-                                            category: category.id,
+                                        admin.families.edit({
+                                            family: family.id,
                                         }).url
                                     "
                                     class="mr-3 text-blue-600 hover:text-blue-900"
@@ -138,7 +113,7 @@ const deleteCategory = (id: number) => {
                                     Editar
                                 </Link>
                                 <button
-                                    @click="deleteCategory(category.id)"
+                                    @click="deleteFamily(family.id)"
                                     class="text-red-600 hover:text-red-900"
                                 >
                                     Eliminar

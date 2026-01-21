@@ -26,14 +26,30 @@ class Course extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    // Alias para la relación teacher
+    public function user()
+    {
+        return $this->teacher();
+    }
+
     public function level()
     {
         return $this->belongsTo(Level::class);
     }
 
+    public function family()
+    {
+        return $this->belongsTo(Family::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function subcategory()
+    {
+        return $this->belongsTo(Subcategory::class);
     }
 
     public function sections()

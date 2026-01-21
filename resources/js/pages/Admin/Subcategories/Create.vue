@@ -8,32 +8,39 @@ interface Family {
     name: string;
 }
 
+interface Category {
+    id: number;
+    name: string;
+    family_id: number | null;
+    family: Family | null;
+}
+
 interface Props {
-    families: Family[];
+    categories: Category[];
 }
 
 defineProps<Props>();
 
 const form = useForm({
     name: '',
-    family_id: '',
+    category_id: '',
     is_active: true,
 });
 
 const submit = () => {
-    form.post(admin.categories.store().url);
+    form.post(admin.subcategories.store().url);
 };
 </script>
 
 <template>
     <AppLayout>
-        <Head title="Crear Categoría" />
+        <Head title="Crear Subcategoría" />
 
         <div class="mx-auto max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
             <div>
-                <h1 class="text-3xl font-bold">Nueva Categoría</h1>
+                <h1 class="text-3xl font-bold">Nueva Subcategoría</h1>
                 <p class="mt-1 text-muted-foreground">
-                    Crea una nueva categoría de contenido
+                    Crea una nueva subcategoría de contenido
                 </p>
             </div>
 
@@ -58,24 +65,48 @@ const submit = () => {
                         </p>
                     </div>
 
-                    <!-- Familia -->
+                    <!-- Categoría -->
                     <div>
                         <label class="mb-2 block text-sm font-medium">
-                            Familia
+                            Categoría *
                         </label>
                         <select
-                            v-model="form.family_id"
+                            v-model="form.category_id"
                             class="w-full rounded-md border px-3 py-2"
+                            required
                         >
-                            <option value="">Selecciona una familia</option>
-                            <option
-                                v-for="family in families"
-                                :key="family.id"
-                                :value="family.id"
+                            <option value="">Selecciona una categoría</option>
+                            <optgroup
+                                v-for="(
+                                    familyCategories, familyName
+                                ) in categories.reduce(
+                                    (acc, cat) => {
+                                        const family =
+                                            cat.family?.name || 'Sin familia';
+                                        if (!acc[family]) acc[family] = [];
+                                        acc[family].push(cat);
+                                        return acc;
+                                    },
+                                    {} as Record<string, Category[]>,
+                                )"
+                                :key="familyName"
+                                :label="familyName"
                             >
-                                {{ family.name }}
-                            </option>
+                                <option
+                                    v-for="cat in familyCategories"
+                                    :key="cat.id"
+                                    :value="cat.id"
+                                >
+                                    {{ cat.name }}
+                                </option>
+                            </optgroup>
                         </select>
+                        <p
+                            v-if="form.errors.category_id"
+                            class="mt-1 text-sm text-red-600"
+                        >
+                            {{ form.errors.category_id }}
+                        </p>
                     </div>
 
                     <!-- Estado -->
@@ -95,10 +126,10 @@ const submit = () => {
                             :disabled="form.processing"
                             class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
                         >
-                            Crear Categoría
+                            Crear Subcategoría
                         </button>
                         <a
-                            :href="admin.categories.index().url"
+                            :href="admin.subcategories.index().url"
                             class="rounded-md border px-4 py-2 hover:bg-gray-50"
                         >
                             Cancelar

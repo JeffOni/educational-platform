@@ -3,21 +3,35 @@
 namespace Database\Seeders;
 
 use App\Models\Category;
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Family;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 
 class CategorySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        Category::create(['name' => 'Desarrollo Web', 'slug' => Str::slug('Desarrollo Web')]);
-        Category::create(['name' => 'Diseño Web', 'slug' => Str::slug('Diseño Web')]);
-        Category::create(['name' => 'Programación', 'slug' => Str::slug('Programación')]);
-        Category::create(['name' => 'Algoritmos', 'slug' => Str::slug('Algoritmos')]);
-        Category::create(['name' => 'Bases de Datos', 'slug' => Str::slug('Bases de Datos')]);
+        $tecnologia = Family::where('slug', 'tecnologia')->first();
+        $negocios = Family::where('slug', 'negocios')->first();
+        $diseno = Family::where('slug', 'diseno')->first();
+
+        $categories = [
+            ['name' => 'Desarrollo Web', 'family_id' => $tecnologia?->id],
+            ['name' => 'Programación', 'family_id' => $tecnologia?->id],
+            ['name' => 'Bases de Datos', 'family_id' => $tecnologia?->id],
+            ['name' => 'Marketing Digital', 'family_id' => $negocios?->id],
+            ['name' => 'Emprendimiento', 'family_id' => $negocios?->id],
+            ['name' => 'Diseño Gráfico', 'family_id' => $diseno?->id],
+            ['name' => 'UX/UI Design', 'family_id' => $diseno?->id],
+        ];
+
+        foreach ($categories as $category) {
+            Category::create([
+                'name' => $category['name'],
+                'slug' => Str::slug($category['name']),
+                'family_id' => $category['family_id'],
+                'is_active' => true,
+            ]);
+        }
     }
 }

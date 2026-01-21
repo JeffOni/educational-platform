@@ -6,34 +6,34 @@ import { Head, useForm } from '@inertiajs/vue3';
 interface Family {
     id: number;
     name: string;
+    is_active: boolean;
 }
 
 interface Props {
-    families: Family[];
+    family: Family;
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 
 const form = useForm({
-    name: '',
-    family_id: '',
-    is_active: true,
+    name: props.family.name,
+    is_active: props.family.is_active,
 });
 
 const submit = () => {
-    form.post(admin.categories.store().url);
+    form.put(admin.families.update({ family: props.family.id }).url);
 };
 </script>
 
 <template>
     <AppLayout>
-        <Head title="Crear Categoría" />
+        <Head :title="`Editar: ${family.name}`" />
 
         <div class="mx-auto max-w-3xl space-y-6 p-4 sm:p-6 lg:p-8">
             <div>
-                <h1 class="text-3xl font-bold">Nueva Categoría</h1>
+                <h1 class="text-3xl font-bold">Editar Familia</h1>
                 <p class="mt-1 text-muted-foreground">
-                    Crea una nueva categoría de contenido
+                    Actualiza los detalles de la familia
                 </p>
             </div>
 
@@ -58,26 +58,6 @@ const submit = () => {
                         </p>
                     </div>
 
-                    <!-- Familia -->
-                    <div>
-                        <label class="mb-2 block text-sm font-medium">
-                            Familia
-                        </label>
-                        <select
-                            v-model="form.family_id"
-                            class="w-full rounded-md border px-3 py-2"
-                        >
-                            <option value="">Selecciona una familia</option>
-                            <option
-                                v-for="family in families"
-                                :key="family.id"
-                                :value="family.id"
-                            >
-                                {{ family.name }}
-                            </option>
-                        </select>
-                    </div>
-
                     <!-- Estado -->
                     <div class="flex items-center">
                         <input
@@ -95,10 +75,10 @@ const submit = () => {
                             :disabled="form.processing"
                             class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
                         >
-                            Crear Categoría
+                            Actualizar Familia
                         </button>
                         <a
-                            :href="admin.categories.index().url"
+                            :href="admin.families.index().url"
                             class="rounded-md border px-4 py-2 hover:bg-gray-50"
                         >
                             Cancelar
