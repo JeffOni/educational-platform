@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import PublicNavbar from '@/components/PublicNavbar.vue';
-import { dashboard, login, register } from '@/routes';
+import { login, register } from '@/routes';
 import { Head, Link } from '@inertiajs/vue3';
 import axios from 'axios';
 import gsap from 'gsap';

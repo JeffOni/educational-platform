@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import PublicNavbar from '@/components/PublicNavbar.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
+import PublicNavbar from '@/components/PublicNavbar.vue';
 import { usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -21,7 +21,7 @@ const cartCount = computed(() => page.props.cartCount || 0);
 <template>
     <div class="min-h-screen bg-background">
         <FlashMessage />
-        
+
         <PublicNavbar
             :cart-count="cartCount"
             :transparent="transparent"

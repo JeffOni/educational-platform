@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -11,11 +10,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import {
     NavigationMenu,
-    NavigationMenuContent,
     NavigationMenuItem,
     NavigationMenuLink,
     NavigationMenuList,
-    NavigationMenuTrigger,
 } from '@/components/ui/navigation-menu';
 import {
     Sheet,
@@ -24,8 +21,8 @@ import {
     SheetTitle,
     SheetTrigger,
 } from '@/components/ui/sheet';
-import { dashboard, login } from '@/routes';
 import { cn } from '@/lib/utils';
+import { dashboard, login } from '@/routes';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import {
     Award,
@@ -37,7 +34,6 @@ import {
     Settings,
     ShoppingCart,
     Sparkles,
-    User,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -97,7 +93,9 @@ const logout = () => {
                     <div
                         class="flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-primary/80 shadow-lg"
                     >
-                        <GraduationCap class="h-5 w-5 text-primary-foreground" />
+                        <GraduationCap
+                            class="h-5 w-5 text-primary-foreground"
+                        />
                     </div>
                     <span
                         class="hidden text-xl font-bold tracking-tight sm:block"
@@ -157,7 +155,7 @@ const logout = () => {
                         <ShoppingCart class="h-5 w-5" />
                         <span
                             v-if="cartCount > 0"
-                            class="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-lg"
+                            class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground shadow-lg"
                         >
                             {{ cartCount }}
                         </span>
@@ -275,7 +273,10 @@ const logout = () => {
                                 <span class="sr-only">Toggle menu</span>
                             </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" class="w-[300px] sm:w-[400px]">
+                        <SheetContent
+                            side="right"
+                            class="w-[300px] sm:w-[400px]"
+                        >
                             <SheetHeader>
                                 <SheetTitle class="flex items-center gap-2">
                                     <div
@@ -301,9 +302,7 @@ const logout = () => {
                                         {{ userInitials }}
                                     </div>
                                     <div class="flex-1 overflow-hidden">
-                                        <p
-                                            class="truncate text-sm font-medium"
-                                        >
+                                        <p class="truncate text-sm font-medium">
                                             {{ userName }}
                                         </p>
                                         <p
@@ -322,7 +321,10 @@ const logout = () => {
                                     @click="mobileMenuOpen = false"
                                     class="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground"
                                 >
-                                    <component :is="link.icon" class="h-4 w-4" />
+                                    <component
+                                        :is="link.icon"
+                                        class="h-4 w-4"
+                                    />
                                     {{ link.label }}
                                 </Link>
 
@@ -367,7 +369,9 @@ const logout = () => {
                                         </Button>
                                     </Link>
 
-                                    <div class="my-2 border-t border-border"></div>
+                                    <div
+                                        class="my-2 border-t border-border"
+                                    ></div>
 
                                     <Link
                                         href="/user/profile"
@@ -396,7 +400,10 @@ const logout = () => {
                                         :href="login()"
                                         @click="mobileMenuOpen = false"
                                     >
-                                        <Button variant="outline" class="w-full">
+                                        <Button
+                                            variant="outline"
+                                            class="w-full"
+                                        >
                                             Iniciar Sesión
                                         </Button>
                                     </Link>

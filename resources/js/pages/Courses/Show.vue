@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import PublicNavbar from '@/components/PublicNavbar.vue';
 import FlashMessage from '@/components/FlashMessage.vue';
-import { login, register } from '@/routes';
+import PublicNavbar from '@/components/PublicNavbar.vue';
+import { login } from '@/routes';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { ShoppingCart, Check } from 'lucide-vue-next';
-import { ref, computed } from 'vue';
+import { Check, ShoppingCart } from 'lucide-vue-next';
+import { computed, ref } from 'vue';
 
 const props = defineProps<{
     course: any;
@@ -25,9 +25,9 @@ const totalLessons = props.course.sections.reduce(
 
 const addToCart = () => {
     if (isAddingToCart.value) return;
-    
+
     isAddingToCart.value = true;
-    
+
     router.post(
         `/cart/add/${props.course.id}`,
         {},
@@ -145,16 +145,22 @@ const addToCart = () => {
                                 :class="[
                                     'flex w-full items-center justify-center gap-2 rounded-xl py-4 text-lg font-bold text-white shadow-lg transition',
                                     isAddingToCart
-                                        ? 'bg-green-600 cursor-not-allowed'
-                                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700'
+                                        ? 'cursor-not-allowed bg-green-600'
+                                        : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700',
                                 ]"
                             >
-                                <component 
-                                    :is="isAddingToCart ? Check : ShoppingCart" 
+                                <component
+                                    :is="isAddingToCart ? Check : ShoppingCart"
                                     :size="20"
-                                    :class="{ 'animate-bounce': isAddingToCart }"
+                                    :class="{
+                                        'animate-bounce': isAddingToCart,
+                                    }"
                                 />
-                                {{ isAddingToCart ? '¡Agregado!' : 'Agregar al Carrito' }}
+                                {{
+                                    isAddingToCart
+                                        ? '¡Agregado!'
+                                        : 'Agregar al Carrito'
+                                }}
                             </button>
                             <p
                                 class="text-center text-sm text-gray-500 dark:text-gray-400"

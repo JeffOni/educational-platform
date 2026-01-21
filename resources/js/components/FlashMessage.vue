@@ -1,7 +1,6 @@
 <script setup lang="ts">
-import { Alert } from '@/components/ui/alert';
 import { usePage } from '@inertiajs/vue3';
-import { CheckCircle2, Info, AlertCircle, XCircle, X } from 'lucide-vue-next';
+import { AlertCircle, CheckCircle2, Info, X, XCircle } from 'lucide-vue-next';
 import { computed, ref, watch } from 'vue';
 
 const page = usePage();
@@ -15,7 +14,12 @@ const flash = computed(() => ({
 }));
 
 const hasMessage = computed(() => {
-    return !!(flash.value.success || flash.value.error || flash.value.info || flash.value.warning);
+    return !!(
+        flash.value.success ||
+        flash.value.error ||
+        flash.value.info ||
+        flash.value.warning
+    );
 });
 
 const messageType = computed(() => {
@@ -27,7 +31,12 @@ const messageType = computed(() => {
 });
 
 const message = computed(() => {
-    return flash.value.success || flash.value.error || flash.value.info || flash.value.warning;
+    return (
+        flash.value.success ||
+        flash.value.error ||
+        flash.value.info ||
+        flash.value.warning
+    );
 });
 
 const iconComponent = computed(() => {
@@ -70,7 +79,7 @@ watch(
             }, 5000);
         }
     },
-    { immediate: true }
+    { immediate: true },
 );
 
 const close = () => {
@@ -94,7 +103,7 @@ const close = () => {
             <div
                 :class="[
                     'flex items-start gap-3 rounded-lg border-2 p-4 shadow-lg',
-                    alertClass
+                    alertClass,
                 ]"
             >
                 <component

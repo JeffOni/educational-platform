@@ -27,16 +27,19 @@ import PublicNavbar from '@/components/PublicNavbar.vue';
 ## Props
 
 ### `cartCount`
+
 - **Tipo:** `number`
 - **Default:** `0`
 - **Descripción:** Número de items en el carrito de compras
 
 ### `showRegister`
+
 - **Tipo:** `boolean`
 - **Default:** `true`
 - **Descripción:** Muestra u oculta el botón de registro
 
 ### `transparent`
+
 - **Tipo:** `boolean`
 - **Default:** `false`
 - **Descripción:** Hace el navbar transparente (útil para hero sections)
@@ -117,6 +120,7 @@ El navbar incluye los siguientes enlaces:
 ## Estilos
 
 El componente utiliza:
+
 - Tailwind CSS para estilos
 - shadcn/ui components (Button, Sheet, NavigationMenu)
 - lucide-vue-next para iconos
@@ -126,9 +130,9 @@ El componente utiliza:
 
 ```json
 {
-  "@inertiajs/vue3": "^2.0.0",
-  "lucide-vue-next": "^0.400.0",
-  "reka-ui": "^2.0.0"
+    "@inertiajs/vue3": "^2.0.0",
+    "lucide-vue-next": "^0.400.0",
+    "reka-ui": "^2.0.0"
 }
 ```
 
