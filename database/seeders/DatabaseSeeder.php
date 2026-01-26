@@ -68,5 +68,8 @@ class DatabaseSeeder extends Seeder
 
         // Crear delegaciones de ejemplo
         $this->call(CourseDelegationSeeder::class);
+
+        // Crear tareas de ejemplo
+        $this->call(AssignmentSeeder::class);
     }
 }

@@ -29,7 +29,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Textarea } from '@/components/ui/textarea';
 import { router, useForm } from '@inertiajs/vue3';
 import {
     ClipboardList,
@@ -43,10 +42,10 @@ import {
     Save,
     Trash2,
     Upload,
-    Users,
     X,
 } from 'lucide-vue-next';
 import { ref } from 'vue';
+import AssignmentsModal from './AssignmentsModal.vue';
 
 interface Resource {
     id: number;
@@ -95,8 +94,8 @@ const editingSection = ref<number | null>(null);
 const addingLesson = ref<number | null>(null);
 const editingLesson = ref<number | null>(null);
 const managingResources = ref<number | null>(null);
-const managingAssignments = ref<number | null>(null);
-const editingAssignment = ref<number | null>(null);
+const showAssignmentsModal = ref(false);
+const currentLessonForAssignments = ref<Lesson | null>(null);
 
 const sectionForm = useForm({
     name: '',
@@ -134,13 +133,6 @@ const secondsToDuration = (seconds: number | null): string => {
 const resourceForm = useForm({
     name: '',
     file: null as File | null,
-});
-
-const assignmentForm = useForm({
-    title: '',
-    description: '',
-    due_date: '',
-    max_points: 100,
 });
 
 // Section Methods
@@ -299,59 +291,24 @@ const deleteResource = (resource: Resource) => {
 };
 
 // Assignment Methods
-const toggleAssignmentsPanel = (lessonId: number) => {
-    const isCurrentlyOpen = managingAssignments.value === lessonId;
+const openAssignmentsModal = (lesson: Lesson) => {
+    // Encontrar la lección completa con assignments en course.sections
+    let fullLesson: Lesson | null = null;
 
-    if (isCurrentlyOpen) {
-        managingAssignments.value = null;
-        editingAssignment.value = null;
-    } else {
-        managingAssignments.value = lessonId;
-        managingResources.value = null; // Cerrar recursos
-        editingAssignment.value = null;
+    for (const section of props.course.sections) {
+        const found = section.lessons.find((l) => l.id === lesson.id);
+        if (found) {
+            fullLesson = found;
+            break;
+        }
     }
 
-    assignmentForm.reset();
+    currentLessonForAssignments.value = fullLesson;
+    showAssignmentsModal.value = true;
 };
 
-const saveAssignment = (lessonId: number) => {
-    assignmentForm.post(`/admin/lessons/${lessonId}/assignments`, {
-        onSuccess: () => {
-            assignmentForm.reset();
-        },
-    });
-};
-
-const editAssignment = (assignment: Assignment) => {
-    editingAssignment.value = assignment.id;
-    assignmentForm.title = assignment.title;
-    assignmentForm.description = assignment.description;
-    assignmentForm.due_date = assignment.due_date || '';
-    assignmentForm.max_points = assignment.max_points;
-};
-
-const updateAssignment = () => {
-    if (!editingAssignment.value) return;
-
-    assignmentForm.put(`/admin/assignments/${editingAssignment.value}`, {
-        onSuccess: () => {
-            editingAssignment.value = null;
-            assignmentForm.reset();
-        },
-    });
-};
-
-const deleteAssignment = (assignment: Assignment) => {
-    useForm({}).delete(`/admin/assignments/${assignment.id}`);
-};
-
-const cancelAssignmentEdit = () => {
-    editingAssignment.value = null;
-    assignmentForm.reset();
-};
-
-const viewSubmissions = (assignmentId: number) => {
-    router.visit(`/admin/assignments/${assignmentId}/submissions`);
+const refreshCourse = () => {
+    router.reload({ only: ['course'] });
 };
 
 const cancelEdit = () => {
@@ -360,12 +317,9 @@ const cancelEdit = () => {
     addingLesson.value = null;
     editingLesson.value = null;
     managingResources.value = null;
-    managingAssignments.value = null;
-    editingAssignment.value = null;
     sectionForm.reset();
     lessonForm.reset();
     resourceForm.reset();
-    assignmentForm.reset();
 };
 
 const formatDuration = (seconds: number | null) => {
@@ -636,15 +590,8 @@ const formatFileSize = (bytes: number) => {
                                             size="sm"
                                             variant="outline"
                                             @click="
-                                                toggleAssignmentsPanel(
-                                                    lesson.id,
-                                                )
+                                                openAssignmentsModal(lesson)
                                             "
-                                            :class="{
-                                                'bg-accent':
-                                                    managingAssignments ===
-                                                    lesson.id,
-                                            }"
                                         >
                                             <ClipboardList
                                                 class="mr-1 h-4 w-4"
@@ -839,215 +786,6 @@ const formatFileSize = (bytes: number) => {
                                         </Button>
                                     </div>
                                 </div>
-
-                                <!-- Assignments Panel -->
-                                <div
-                                    v-if="managingAssignments === lesson.id"
-                                    class="mt-4 space-y-4 rounded-lg bg-muted/50 p-4"
-                                    :key="`assignments-${lesson.id}`"
-                                >
-                                    <div
-                                        class="flex items-center justify-between"
-                                    >
-                                        <h4 class="font-medium">
-                                            Tareas de la Lección
-                                        </h4>
-                                        <Button
-                                            size="sm"
-                                            variant="ghost"
-                                            @click="
-                                                toggleAssignmentsPanel(
-                                                    lesson.id,
-                                                )
-                                            "
-                                        >
-                                            <X class="h-4 w-4" />
-                                        </Button>
-                                    </div>
-
-                                    <!-- Assignments List -->
-                                    <div
-                                        v-if="
-                                            lesson.assignments &&
-                                            lesson.assignments.length > 0
-                                        "
-                                        class="space-y-3"
-                                    >
-                                        <div
-                                            v-for="assignment in lesson.assignments"
-                                            :key="assignment.id"
-                                            class="rounded border bg-background p-3"
-                                        >
-                                            <div
-                                                class="flex items-start justify-between"
-                                            >
-                                                <div class="flex-1">
-                                                    <div class="font-medium">
-                                                        {{ assignment.title }}
-                                                    </div>
-                                                    <p
-                                                        class="mt-1 text-sm text-muted-foreground"
-                                                    >
-                                                        {{
-                                                            assignment.description
-                                                        }}
-                                                    </p>
-                                                    <div
-                                                        class="mt-2 flex gap-4 text-xs text-muted-foreground"
-                                                    >
-                                                        <span
-                                                            v-if="
-                                                                assignment.due_date
-                                                            "
-                                                        >
-                                                            Vence:
-                                                            {{
-                                                                new Date(
-                                                                    assignment.due_date,
-                                                                ).toLocaleString(
-                                                                    'es-ES',
-                                                                )
-                                                            }}
-                                                        </span>
-                                                        <span
-                                                            >Puntos:
-                                                            {{
-                                                                assignment.max_points
-                                                            }}</span
-                                                        >
-                                                    </div>
-                                                </div>
-                                                <div class="flex gap-2">
-                                                    <Button
-                                                        size="sm"
-                                                        variant="outline"
-                                                        @click="
-                                                            viewSubmissions(
-                                                                assignment.id,
-                                                            )
-                                                        "
-                                                    >
-                                                        <Users
-                                                            class="mr-1 h-4 w-4"
-                                                        />
-                                                        Ver Entregas
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        @click="
-                                                            editAssignment(
-                                                                assignment,
-                                                            )
-                                                        "
-                                                    >
-                                                        <Pencil
-                                                            class="h-4 w-4"
-                                                        />
-                                                    </Button>
-                                                    <Button
-                                                        size="sm"
-                                                        variant="ghost"
-                                                        @click="
-                                                            deleteAssignment(
-                                                                assignment,
-                                                            )
-                                                        "
-                                                    >
-                                                        <Trash2
-                                                            class="h-4 w-4 text-destructive"
-                                                        />
-                                                    </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Add Assignment Form -->
-                                    <div
-                                        class="space-y-3 rounded border-2 border-dashed p-3"
-                                    >
-                                        <div class="space-y-2">
-                                            <Label>Título de la Tarea</Label>
-                                            <Input
-                                                v-model="assignmentForm.title"
-                                                placeholder="Ej: Cuestionario sobre el tema"
-                                            />
-                                        </div>
-                                        <div class="space-y-2">
-                                            <Label>Descripción</Label>
-                                            <Textarea
-                                                v-model="
-                                                    assignmentForm.description
-                                                "
-                                                placeholder="Instrucciones para completar la tarea..."
-                                                rows="3"
-                                            />
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-3">
-                                            <div class="space-y-2">
-                                                <Label
-                                                    >Fecha límite
-                                                    (opcional)</Label
-                                                >
-                                                <Input
-                                                    type="datetime-local"
-                                                    v-model="
-                                                        assignmentForm.due_date
-                                                    "
-                                                />
-                                            </div>
-                                            <div class="space-y-2">
-                                                <Label>Puntos máximos</Label>
-                                                <Input
-                                                    type="number"
-                                                    v-model="
-                                                        assignmentForm.max_points
-                                                    "
-                                                    placeholder="100"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div class="flex gap-2">
-                                            <Button
-                                                v-if="editingAssignment"
-                                                size="sm"
-                                                variant="outline"
-                                                @click="cancelAssignmentEdit"
-                                            >
-                                                Cancelar
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                @click="
-                                                    editingAssignment
-                                                        ? updateAssignment()
-                                                        : saveAssignment(
-                                                              lesson.id,
-                                                          )
-                                                "
-                                                :disabled="
-                                                    !assignmentForm.title ||
-                                                    !assignmentForm.description
-                                                "
-                                            >
-                                                <Save
-                                                    v-if="editingAssignment"
-                                                    class="mr-2 h-4 w-4"
-                                                />
-                                                <Plus
-                                                    v-else
-                                                    class="mr-2 h-4 w-4"
-                                                />
-                                                {{
-                                                    editingAssignment
-                                                        ? 'Actualizar Tarea'
-                                                        : 'Crear Tarea'
-                                                }}
-                                            </Button>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
 
@@ -1212,4 +950,11 @@ const formatFileSize = (bytes: number) => {
             </Button>
         </CardContent>
     </Card>
+
+    <!-- Modal de Tareas -->
+    <AssignmentsModal
+        v-model:open="showAssignmentsModal"
+        :lesson="currentLessonForAssignments"
+        @refresh="refreshCourse"
+    />
 </template>

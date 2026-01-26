@@ -20,6 +20,7 @@ import {
     Award,
     BarChart3,
     BookOpen,
+    ClipboardList,
     Folder,
     GraduationCap,
     Layers,
@@ -51,6 +52,11 @@ const mainNavItems = computed<NavItem[]>(() => {
                 title: 'Mis Cursos',
                 href: admin.courses.index().url,
                 icon: MonitorPlay,
+            },
+            {
+                title: 'Tareas',
+                href: '/admin/assignments',
+                icon: ClipboardList,
             },
             {
                 title: 'Preguntas',
@@ -101,6 +107,11 @@ const mainNavItems = computed<NavItem[]>(() => {
                 title: 'Mis Cursos',
                 href: admin.courses.index().url,
                 icon: MonitorPlay,
+            },
+            {
+                title: 'Tareas',
+                href: '/admin/assignments',
+                icon: ClipboardList,
             },
             {
                 title: 'Preguntas',

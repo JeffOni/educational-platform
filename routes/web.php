@@ -10,6 +10,7 @@ use App\Http\Controllers\Admin\SectionController;
 use App\Http\Controllers\Admin\LessonController;
 use App\Http\Controllers\Admin\LessonResourceController;
 use App\Http\Controllers\Admin\LessonAssignmentController;
+use App\Http\Controllers\Admin\AssignmentController;
 use App\Http\Controllers\Admin\AssignmentSubmissionController as AdminAssignmentSubmissionController;
 use App\Http\Controllers\Admin\QuestionController as AdminQuestionController;
 use App\Http\Controllers\Admin\UserController;
@@ -84,6 +85,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('resources/{resource}', [LessonResourceController::class, 'destroy'])->name('resources.destroy');
 
         // Rutas para Tareas de Lecciones
+        Route::get('assignments', [AssignmentController::class, 'index'])->name('assignments.index');
         Route::post('lessons/{lesson}/assignments', [LessonAssignmentController::class, 'store'])->name('lessons.assignments.store');
         Route::put('assignments/{assignment}', [LessonAssignmentController::class, 'update'])->name('assignments.update');
         Route::delete('assignments/{assignment}', [LessonAssignmentController::class, 'destroy'])->name('assignments.destroy');

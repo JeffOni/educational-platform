@@ -12,11 +12,20 @@ class AssignmentSubmissionController extends Controller
 {
     public function index(LessonAssignment $assignment)
     {
-        // Verificar que el profesor sea dueño del curso
+        // Verificar permisos: Admin puede todo, profesor solo sus cursos o delegaciones
         $course = $assignment->lesson->section->course;
 
-        if ($course->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para ver estas entregas');
+        $user = auth()->user();
+
+        // Admin y super admin tienen acceso total
+        if (!$user->hasRole(['admin', 'super-admin'])) {
+            // Profesor debe ser dueño o tener delegación
+            $hasAccess = $course->user_id === $user->id ||
+                $course->userCanGrade($user->id);
+
+            if (!$hasAccess) {
+                abort(403, 'No tienes permiso para ver estas entregas');
+            }
         }
 
         // Cargar entregas con información del estudiante
@@ -33,11 +42,20 @@ class AssignmentSubmissionController extends Controller
 
     public function grade(Request $request, AssignmentSubmission $submission)
     {
-        // Verificar que el profesor sea dueño del curso
+        // Verificar permisos: Admin puede todo, profesor solo sus cursos o delegaciones
         $course = $submission->assignment->lesson->section->course;
 
-        if ($course->user_id !== auth()->id()) {
-            abort(403, 'No tienes permiso para calificar esta entrega');
+        $user = auth()->user();
+
+        // Admin y super admin tienen acceso total
+        if (!$user->hasRole(['admin', 'super-admin'])) {
+            // Profesor debe ser dueño o tener delegación
+            $hasAccess = $course->user_id === $user->id ||
+                $course->userCanGrade($user->id);
+
+            if (!$hasAccess) {
+                abort(403, 'No tienes permiso para calificar esta entrega');
+            }
         }
 
         $request->validate([
