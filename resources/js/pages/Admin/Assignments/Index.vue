@@ -1,13 +1,7 @@
 <script setup lang="ts">
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import {
     Select,
@@ -16,17 +10,24 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
-import { Head, router } from '@inertiajs/vue3';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link } from '@inertiajs/vue3';
 import {
     AlertCircle,
-    BookOpen,
     Calendar,
-    CheckCircle2,
+    CheckCircle,
     Clock,
+    Eye,
     FileText,
     Search,
-    Users,
 } from 'lucide-vue-next';
 import { computed, ref } from 'vue';
 
@@ -57,7 +58,7 @@ interface Assignment {
 
 interface Props {
     assignments: Assignment[];
-    filters: {
+    filters?: {
         search?: string;
         status?: string;
     };
@@ -65,399 +66,378 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const search = ref(props.filters.search || '');
-const statusFilter = ref(props.filters.status || 'all');
+const searchQuery = ref(props.filters?.search || '');
+const selectedStatus = ref(props.filters?.status || 'all');
 
-const applyFilters = () => {
-    router.get(
-        '/admin/assignments',
-        {
-            search: search.value || undefined,
-            status:
-                statusFilter.value !== 'all' ? statusFilter.value : undefined,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-        },
-    );
+const filteredAssignments = computed(() => {
+    let filtered = props.assignments;
+
+    // Filtro de búsqueda
+    if (searchQuery.value) {
+        const query = searchQuery.value.toLowerCase();
+        filtered = filtered.filter(
+            (assignment) =>
+                assignment.title.toLowerCase().includes(query) ||
+                assignment.course.title.toLowerCase().includes(query) ||
+                assignment.lesson.name.toLowerCase().includes(query),
+        );
+    }
+
+    // Filtro de estado
+    if (selectedStatus.value !== 'all') {
+        filtered = filtered.filter((assignment) => {
+            if (selectedStatus.value === 'pending') {
+                return assignment.pending_submissions > 0;
+            }
+            if (selectedStatus.value === 'graded') {
+                return (
+                    assignment.graded_submissions ===
+                        assignment.total_submissions &&
+                    assignment.total_submissions > 0
+                );
+            }
+            if (selectedStatus.value === 'overdue') {
+                return assignment.is_overdue;
+            }
+            return true;
+        });
+    }
+
+    return filtered;
+});
+
+const totalAssignments = computed(() => props.assignments.length);
+const pendingAssignments = computed(
+    () => props.assignments.filter((a) => a.pending_submissions > 0).length,
+);
+const gradedAssignments = computed(
+    () =>
+        props.assignments.filter(
+            (a) =>
+                a.graded_submissions === a.total_submissions &&
+                a.total_submissions > 0,
+        ).length,
+);
+const overdueAssignments = computed(
+    () => props.assignments.filter((a) => a.is_overdue).length,
+);
+
+const getStatusBadge = (assignment: Assignment) => {
+    if (assignment.is_overdue && assignment.pending_submissions > 0) {
+        return {
+            text: 'Vencida',
+            variant: 'destructive' as const,
+        };
+    }
+    if (
+        assignment.graded_submissions === assignment.total_submissions &&
+        assignment.total_submissions > 0
+    ) {
+        return {
+            text: 'Completa',
+            variant: 'default' as const,
+        };
+    }
+    if (assignment.pending_submissions > 0) {
+        return {
+            text: 'Pendiente',
+            variant: 'secondary' as const,
+        };
+    }
+    return {
+        text: 'Sin entregas',
+        variant: 'outline' as const,
+    };
 };
 
-const clearFilters = () => {
-    search.value = '';
-    statusFilter.value = 'all';
-    router.get('/admin/assignments');
-};
-
-const viewSubmissions = (assignmentId: number) => {
-    router.visit(`/admin/assignments/${assignmentId}/submissions`);
-};
-
-const formatDate = (date: string | null) => {
-    if (!date) return 'Sin fecha límite';
-    return new Date(date).toLocaleDateString('es-ES', {
-        day: '2-digit',
+const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'Sin fecha';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('es-ES', {
+        day: 'numeric',
         month: 'short',
         year: 'numeric',
     });
 };
 
-const getSubmissionTypeLabel = (type: string) => {
-    const types: Record<string, string> = {
-        file: 'Archivo',
-        text: 'Texto',
-        link: 'Enlace',
-        file_and_text: 'Archivo y Texto',
-        forum: 'Foro',
-    };
-    return types[type] || type;
-};
-
-const getStatusBadge = (assignment: Assignment) => {
-    if (assignment.total_submissions === 0) {
-        return { text: 'Sin entregas', variant: 'secondary' as const };
-    }
-    if (assignment.pending_submissions === 0) {
-        return { text: 'Todas calificadas', variant: 'default' as const };
-    }
-    if (assignment.is_overdue && assignment.pending_submissions > 0) {
-        return { text: 'Vencida', variant: 'destructive' as const };
-    }
-    return {
-        text: `${assignment.pending_submissions} pendientes`,
-        variant: 'outline' as const,
-    };
-};
-
-const totalAssignments = computed(() => props.assignments.length);
-const totalPending = computed(() =>
-    props.assignments.reduce((sum, a) => sum + a.pending_submissions, 0),
-);
-const totalGraded = computed(() =>
-    props.assignments.reduce((sum, a) => sum + a.graded_submissions, 0),
-);
-const overdueAssignments = computed(
-    () =>
-        props.assignments.filter(
-            (a) => a.is_overdue && a.pending_submissions > 0,
-        ).length,
-);
+const breadcrumbs = [
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Tareas', href: '#' },
+];
 </script>
 
 <template>
-    <Head title="Gestión de Tareas" />
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <Head title="Tareas" />
 
-    <AuthenticatedLayout>
-        <div class="py-12">
-            <div class="w-full sm:px-6 lg:px-8">
-                <!-- Header -->
-                <div class="mb-6">
-                    <h1 class="text-3xl font-bold text-gray-900">
-                        Gestión de Tareas
-                    </h1>
-                    <p class="mt-2 text-gray-600">
-                        Administra y califica todas las tareas de tus cursos
-                    </p>
-                </div>
+        <div class="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+            <!-- Header -->
+            <div>
+                <h1 class="text-3xl font-bold">Gestión de Tareas</h1>
+                <p class="mt-1 text-muted-foreground">
+                    Vista centralizada de todas las tareas y entregas
+                </p>
+            </div>
 
-                <!-- Estadísticas -->
-                <div class="mb-6 grid grid-cols-1 gap-4 md:grid-cols-4">
-                    <Card>
-                        <CardContent class="pt-6">
-                            <div class="flex items-center gap-3">
-                                <div class="rounded-lg bg-blue-100 p-3">
-                                    <FileText class="h-6 w-6 text-blue-600" />
-                                </div>
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-gray-600"
-                                    >
-                                        Total Tareas
-                                    </p>
-                                    <p class="text-2xl font-bold text-gray-900">
-                                        {{ totalAssignments }}
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardContent class="pt-6">
-                            <div class="flex items-center gap-3">
-                                <div class="rounded-lg bg-yellow-100 p-3">
-                                    <Clock class="h-6 w-6 text-yellow-600" />
-                                </div>
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-gray-600"
-                                    >
-                                        Por Calificar
-                                    </p>
-                                    <p class="text-2xl font-bold text-gray-900">
-                                        {{ totalPending }}
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardContent class="pt-6">
-                            <div class="flex items-center gap-3">
-                                <div class="rounded-lg bg-green-100 p-3">
-                                    <CheckCircle2
-                                        class="h-6 w-6 text-green-600"
-                                    />
-                                </div>
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-gray-600"
-                                    >
-                                        Calificadas
-                                    </p>
-                                    <p class="text-2xl font-bold text-gray-900">
-                                        {{ totalGraded }}
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardContent class="pt-6">
-                            <div class="flex items-center gap-3">
-                                <div class="rounded-lg bg-red-100 p-3">
-                                    <AlertCircle class="h-6 w-6 text-red-600" />
-                                </div>
-                                <div>
-                                    <p
-                                        class="text-sm font-medium text-gray-600"
-                                    >
-                                        Vencidas
-                                    </p>
-                                    <p class="text-2xl font-bold text-gray-900">
-                                        {{ overdueAssignments }}
-                                    </p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <!-- Filtros -->
-                <Card class="mb-6">
-                    <CardContent class="pt-6">
-                        <div class="flex flex-col gap-4 md:flex-row">
-                            <div class="relative flex-1">
-                                <Search
-                                    class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-gray-400"
-                                />
-                                <Input
-                                    v-model="search"
-                                    placeholder="Buscar tareas..."
-                                    class="pl-10"
-                                    @keyup.enter="applyFilters"
-                                />
-                            </div>
-                            <Select
-                                v-model="statusFilter"
-                                @update:model-value="applyFilters"
-                            >
-                                <SelectTrigger class="w-full md:w-[200px]">
-                                    <SelectValue placeholder="Estado" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="all">Todas</SelectItem>
-                                    <SelectItem value="pending"
-                                        >Con pendientes</SelectItem
-                                    >
-                                    <SelectItem value="graded"
-                                        >Todas calificadas</SelectItem
-                                    >
-                                    <SelectItem value="overdue"
-                                        >Vencidas</SelectItem
-                                    >
-                                </SelectContent>
-                            </Select>
-                            <Button variant="outline" @click="clearFilters">
-                                Limpiar
-                            </Button>
+            <!-- Statistics Cards -->
+            <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle class="text-sm font-medium"
+                            >Total de Tareas</CardTitle
+                        >
+                        <FileText class="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold">
+                            {{ totalAssignments }}
                         </div>
+                        <p class="text-xs text-muted-foreground">
+                            En todos los cursos
+                        </p>
                     </CardContent>
                 </Card>
 
-                <!-- Lista de Tareas -->
                 <Card>
-                    <CardHeader>
-                        <CardTitle>Tareas Asignadas</CardTitle>
-                        <CardDescription>
-                            Lista completa de todas las tareas de tus cursos
-                        </CardDescription>
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle class="text-sm font-medium"
+                            >Pendientes</CardTitle
+                        >
+                        <Clock class="h-4 w-4 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <!-- Empty State -->
-                        <div
-                            v-if="assignments.length === 0"
-                            class="py-12 text-center"
-                        >
-                            <FileText
-                                class="mx-auto mb-4 h-16 w-16 text-gray-300"
-                            />
-                            <h3
-                                class="mb-2 text-lg font-semibold text-gray-900"
-                            >
-                                No hay tareas
-                            </h3>
-                            <p class="text-gray-600">
-                                {{
-                                    filters.search || filters.status
-                                        ? 'No se encontraron tareas con los filtros aplicados'
-                                        : 'Crea tareas desde el plan de estudios de tus cursos'
-                                }}
-                            </p>
+                        <div class="text-2xl font-bold">
+                            {{ pendingAssignments }}
                         </div>
+                        <p class="text-xs text-muted-foreground">
+                            Con entregas sin calificar
+                        </p>
+                    </CardContent>
+                </Card>
 
-                        <!-- Tabla -->
-                        <div v-else class="space-y-4">
-                            <div
-                                v-for="assignment in assignments"
+                <Card>
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle class="text-sm font-medium"
+                            >Calificadas</CardTitle
+                        >
+                        <CheckCircle class="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold">
+                            {{ gradedAssignments }}
+                        </div>
+                        <p class="text-xs text-muted-foreground">
+                            Todas las entregas evaluadas
+                        </p>
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader
+                        class="flex flex-row items-center justify-between space-y-0 pb-2"
+                    >
+                        <CardTitle class="text-sm font-medium"
+                            >Vencidas</CardTitle
+                        >
+                        <AlertCircle class="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div class="text-2xl font-bold">
+                            {{ overdueAssignments }}
+                        </div>
+                        <p class="text-xs text-muted-foreground">
+                            Con fecha límite pasada
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <!-- Table -->
+            <Card>
+                <CardHeader>
+                    <div
+                        class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
+                    >
+                        <div class="relative flex-1">
+                            <Search
+                                class="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground"
+                            />
+                            <Input
+                                v-model="searchQuery"
+                                placeholder="Buscar por título, curso o lección..."
+                                class="pl-10"
+                            />
+                        </div>
+                        <Select v-model="selectedStatus">
+                            <SelectTrigger class="w-full sm:w-[200px]">
+                                <SelectValue placeholder="Filtrar por estado" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">Todas</SelectItem>
+                                <SelectItem value="pending"
+                                    >Pendientes</SelectItem
+                                >
+                                <SelectItem value="graded"
+                                    >Calificadas</SelectItem
+                                >
+                                <SelectItem value="overdue"
+                                    >Vencidas</SelectItem
+                                >
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div
+                        v-if="filteredAssignments.length === 0"
+                        class="py-12 text-center text-muted-foreground"
+                    >
+                        <FileText class="mx-auto mb-4 h-12 w-12 opacity-50" />
+                        <p class="mb-2 text-lg font-medium">
+                            No se encontraron tareas
+                        </p>
+                        <p class="text-sm">
+                            {{
+                                searchQuery || selectedStatus !== 'all'
+                                    ? 'Intenta con otros filtros'
+                                    : 'Crea tareas desde la gestión de cursos'
+                            }}
+                        </p>
+                    </div>
+                    <Table v-else>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Tarea</TableHead>
+                                <TableHead>Curso / Lección</TableHead>
+                                <TableHead>Fecha Límite</TableHead>
+                                <TableHead>Puntos</TableHead>
+                                <TableHead>Entregas</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead class="text-right"
+                                    >Acciones</TableHead
+                                >
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            <TableRow
+                                v-for="assignment in filteredAssignments"
                                 :key="assignment.id"
-                                class="overflow-hidden rounded-lg border transition-all hover:shadow-md"
                             >
-                                <div class="p-4">
-                                    <div
-                                        class="mb-3 flex items-start justify-between gap-4"
-                                    >
-                                        <div class="flex-1">
-                                            <h3
-                                                class="mb-1 text-lg font-semibold text-gray-900"
-                                            >
-                                                {{ assignment.title }}
-                                            </h3>
-                                            <p
-                                                class="mb-2 line-clamp-2 text-sm text-gray-600"
-                                            >
-                                                {{ assignment.description }}
-                                            </p>
-                                            <div
-                                                class="flex flex-wrap items-center gap-2"
-                                            >
-                                                <div
-                                                    class="flex items-center gap-1 text-xs text-gray-500"
-                                                >
-                                                    <BookOpen class="h-3 w-3" />
-                                                    {{
-                                                        assignment.course.title
-                                                    }}
-                                                </div>
-                                                <span class="text-gray-300"
-                                                    >•</span
-                                                >
-                                                <div
-                                                    class="text-xs text-gray-500"
-                                                >
-                                                    {{
-                                                        assignment.section.name
-                                                    }}
-                                                </div>
-                                                <span class="text-gray-300"
-                                                    >•</span
-                                                >
-                                                <div
-                                                    class="text-xs text-gray-500"
-                                                >
-                                                    {{ assignment.lesson.name }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <Badge
-                                            :variant="
-                                                getStatusBadge(assignment)
-                                                    .variant
-                                            "
-                                        >
-                                            {{
-                                                getStatusBadge(assignment).text
-                                            }}
-                                        </Badge>
-                                    </div>
-
-                                    <div
-                                        class="mb-3 flex flex-wrap items-center gap-4 text-sm"
-                                    >
-                                        <div
-                                            class="flex items-center gap-1 text-gray-600"
-                                        >
-                                            <Calendar class="h-4 w-4" />
-                                            <span>{{
-                                                formatDate(assignment.due_date)
-                                            }}</span>
+                                <TableCell>
+                                    <div>
+                                        <div class="font-medium">
+                                            {{ assignment.title }}
                                         </div>
                                         <div
-                                            class="flex items-center gap-1 text-gray-600"
+                                            v-if="assignment.description"
+                                            class="line-clamp-1 text-sm text-muted-foreground"
                                         >
-                                            <Users class="h-4 w-4" />
-                                            <span
-                                                >{{
-                                                    assignment.total_submissions
-                                                }}
-                                                entregas</span
-                                            >
+                                            {{ assignment.description }}
                                         </div>
-                                        <Badge variant="outline">
-                                            {{
-                                                getSubmissionTypeLabel(
-                                                    assignment.submission_type,
-                                                )
-                                            }}
-                                        </Badge>
-                                        <Badge variant="secondary">
-                                            {{ assignment.max_points }} pts
-                                        </Badge>
                                     </div>
-
+                                </TableCell>
+                                <TableCell>
+                                    <div class="space-y-1">
+                                        <div class="text-sm font-medium">
+                                            {{ assignment.course.title }}
+                                        </div>
+                                        <div
+                                            class="text-xs text-muted-foreground"
+                                        >
+                                            {{ assignment.section.name }} ›
+                                            {{ assignment.lesson.name }}
+                                        </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
                                     <div class="flex items-center gap-2">
-                                        <Button
-                                            @click="
-                                                viewSubmissions(assignment.id)
-                                            "
-                                            class="flex-1"
+                                        <Calendar
+                                            class="h-4 w-4 text-muted-foreground"
+                                        />
+                                        <span
+                                            :class="[
+                                                'text-sm',
+                                                assignment.is_overdue
+                                                    ? 'font-medium text-destructive'
+                                                    : '',
+                                            ]"
                                         >
-                                            Ver Entregas
-                                            <span
+                                            {{
+                                                formatDate(assignment.due_date)
+                                            }}
+                                        </span>
+                                    </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge variant="outline">
+                                        {{ assignment.max_points }} pts
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>
+                                    <div class="flex flex-col gap-1">
+                                        <span class="text-sm">
+                                            Total:
+                                            {{ assignment.total_submissions }}
+                                        </span>
+                                        <div class="flex gap-1">
+                                            <Badge
+                                                variant="outline"
+                                                class="text-xs"
+                                            >
+                                                ✓
+                                                {{
+                                                    assignment.graded_submissions
+                                                }}
+                                            </Badge>
+                                            <Badge
                                                 v-if="
                                                     assignment.pending_submissions >
                                                     0
                                                 "
-                                                class="ml-2 rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-primary"
+                                                variant="secondary"
+                                                class="text-xs"
                                             >
+                                                ⏳
                                                 {{
                                                     assignment.pending_submissions
                                                 }}
-                                            </span>
-                                        </Button>
-                                        <div
-                                            v-if="
-                                                assignment.graded_submissions >
-                                                0
-                                            "
-                                            class="text-sm text-gray-600"
-                                        >
-                                            {{
-                                                assignment.graded_submissions
-                                            }}/{{
-                                                assignment.total_submissions
-                                            }}
-                                            calificadas
+                                            </Badge>
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
+                                </TableCell>
+                                <TableCell>
+                                    <Badge
+                                        :variant="
+                                            getStatusBadge(assignment).variant
+                                        "
+                                    >
+                                        {{ getStatusBadge(assignment).text }}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell class="text-right">
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        as-child
+                                    >
+                                        <Link
+                                            :href="`/admin/assignments/${assignment.id}/submissions`"
+                                        >
+                                            <Eye class="h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
         </div>
-    </AuthenticatedLayout>
+    </AppLayout>
 </template>
