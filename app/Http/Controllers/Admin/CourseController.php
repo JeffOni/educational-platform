@@ -91,9 +91,9 @@ class CourseController extends Controller
 
     public function edit(Course $course)
     {
-        // Permitir edición si es admin o si es el dueño del curso
-        if (!auth()->user()->hasRole('admin') && $course->user_id !== auth()->id()) {
-            abort(403);
+        // Permitir edición si es admin o si es el dueño del curso o tiene delegación activa
+        if (!$course->userCanEdit(auth()->user())) {
+            abort(403, 'No tienes permiso para editar este curso');
         }
 
         return Inertia::render('Admin/Courses/Edit', [
@@ -107,9 +107,9 @@ class CourseController extends Controller
 
     public function update(Request $request, Course $course)
     {
-        // Permitir actualización si es admin o si es el dueño del curso
-        if (!auth()->user()->hasRole('admin') && $course->user_id !== auth()->id()) {
-            abort(403);
+        // Permitir actualización si es admin o si es el dueño del curso o tiene delegación activa
+        if (!$course->userCanEdit(auth()->user())) {
+            abort(403, 'No tienes permiso para actualizar este curso');
         }
 
         $request->validate([
@@ -145,8 +145,9 @@ class CourseController extends Controller
     public function publish(Course $course)
     {
         // Permitir publicación si es admin o si es el dueño del curso
+        // La delegación NO permite publicar, solo el titular
         if (!auth()->user()->hasRole('admin') && $course->user_id !== auth()->id()) {
-            abort(403);
+            abort(403, 'Solo el profesor titular puede publicar el curso');
         }
 
         $course->update(['status' => Course::PUBLICADO]);

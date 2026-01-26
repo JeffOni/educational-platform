@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\LessonAssignmentController;
 use App\Http\Controllers\Admin\AssignmentSubmissionController as AdminAssignmentSubmissionController;
 use App\Http\Controllers\Admin\QuestionController as AdminQuestionController;
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\CourseDelegationController;
 use App\Http\Controllers\Admin\FamilyController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\SubcategoryController;
@@ -94,6 +95,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Rutas para Preguntas y Respuestas
         Route::get('questions', [AdminQuestionController::class, 'index'])->name('questions.index');
         Route::post('questions/{question}/answer', [AdminQuestionController::class, 'store'])->name('questions.answer');
+
+        // Rutas para Delegaciones de Cursos
+        Route::prefix('courses/{course}/delegations')->name('courses.delegations.')->group(function () {
+            Route::get('/', [CourseDelegationController::class, 'index'])->name('index');
+            Route::get('/available-teachers', [CourseDelegationController::class, 'availableTeachers'])->name('available-teachers');
+            Route::post('/', [CourseDelegationController::class, 'store'])->name('store');
+            Route::put('/{delegation}', [CourseDelegationController::class, 'update'])->name('update');
+            Route::post('/{delegation}/revoke', [CourseDelegationController::class, 'revoke'])->name('revoke');
+            Route::delete('/{delegation}', [CourseDelegationController::class, 'destroy'])->name('destroy');
+        });
     });
 
     // Rutas solo para Administradores

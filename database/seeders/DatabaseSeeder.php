@@ -65,5 +65,8 @@ class DatabaseSeeder extends Seeder
 
         // Crear cursos con contenido
         $this->call(CourseSeeder::class);
+
+        // Crear delegaciones de ejemplo
+        $this->call(CourseDelegationSeeder::class);
     }
 }
