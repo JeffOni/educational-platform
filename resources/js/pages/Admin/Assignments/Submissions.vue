@@ -122,7 +122,7 @@ const pendingCount = props.submissions.length - gradedCount;
 
     <AuthenticatedLayout>
         <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
+            <div class="w-full sm:px-6 lg:px-8">
                 <!-- Breadcrumb -->
                 <div class="mb-6 text-sm text-gray-600">
                     <Button

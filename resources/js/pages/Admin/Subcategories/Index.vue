@@ -40,7 +40,7 @@ const deleteSubcategory = (id: number) => {
     <AppLayout>
         <Head title="Gestión de Subcategorías" />
 
-        <div class="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
+        <div class="w-full space-y-6 p-4 sm:p-6 lg:p-8">
             <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>

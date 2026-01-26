@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
-import AppLayout from '@/layouts/AppLayout.vue';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
     Table,
     TableBody,
@@ -10,9 +10,9 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Pencil, Trash2 } from 'lucide-vue-next';
+import AppLayout from '@/layouts/AppLayout.vue';
+import { Head, Link } from '@inertiajs/vue3';
+import { Pencil, Plus, Trash2 } from 'lucide-vue-next';
 
 interface Level {
     id: number;
@@ -36,10 +36,10 @@ const breadcrumbs = [
     <AppLayout :breadcrumbs="breadcrumbs">
         <Head title="Niveles" />
 
-        <div class="max-w-7xl mx-auto p-4 sm:p-6 lg:p-8">
+        <div class="w-full p-4 sm:p-6 lg:p-8">
             <Card>
                 <CardHeader>
-                    <div class="flex justify-between items-center">
+                    <div class="flex items-center justify-between">
                         <CardTitle>Gestión de Niveles</CardTitle>
                         <Button as-child>
                             <Link href="/admin/levels/create">
@@ -50,15 +50,22 @@ const breadcrumbs = [
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div v-if="levels.length === 0" class="text-center py-8 text-muted-foreground">
+                    <div
+                        v-if="levels.length === 0"
+                        class="py-8 text-center text-muted-foreground"
+                    >
                         No hay niveles registrados
                     </div>
                     <Table v-else>
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Nombre</TableHead>
-                                <TableHead class="text-center">Cursos</TableHead>
-                                <TableHead class="text-right">Acciones</TableHead>
+                                <TableHead class="text-center"
+                                    >Cursos</TableHead
+                                >
+                                <TableHead class="text-right"
+                                    >Acciones</TableHead
+                                >
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -73,8 +80,14 @@ const breadcrumbs = [
                                 </TableCell>
                                 <TableCell class="text-right">
                                     <div class="flex justify-end gap-2">
-                                        <Button variant="outline" size="sm" as-child>
-                                            <Link :href="`/admin/levels/${level.id}/edit`">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            as-child
+                                        >
+                                            <Link
+                                                :href="`/admin/levels/${level.id}/edit`"
+                                            >
                                                 <Pencil class="h-4 w-4" />
                                             </Link>
                                         </Button>

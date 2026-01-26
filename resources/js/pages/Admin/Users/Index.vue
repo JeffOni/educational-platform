@@ -1,17 +1,6 @@
 <script setup lang="ts">
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
+import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { Trash2, Edit, UserPlus } from 'lucide-vue-next';
 
 interface User {
     id: number;
@@ -45,7 +34,9 @@ const getStudentTypeBadge = (studentType: string | null) => {
     return studentType === 'external' ? 'Externo' : 'Interno';
 };
 
-const getStudentTypeVariant = (studentType: string | null): 'default' | 'secondary' | 'outline' => {
+const getStudentTypeVariant = (
+    studentType: string | null,
+): 'default' | 'secondary' | 'outline' => {
     if (!studentType) return 'default';
     return studentType === 'external' ? 'outline' : 'default';
 };
@@ -54,77 +45,103 @@ const getStudentTypeVariant = (studentType: string | null): 'default' | 'seconda
 <template>
     <Head title="Usuarios" />
 
-    <AuthenticatedLayout>
-        <div class="space-y-6">
+    <AppLayout>
+        <div class="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+            <!-- Header -->
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Usuarios</h2>
-                    <p class="text-muted-foreground">
+                    <h1 class="text-3xl font-bold">Usuarios</h1>
+                    <p class="mt-1 text-muted-foreground">
                         Gestiona los usuarios del sistema
                     </p>
                 </div>
-                <Link href="/admin/users/create">
-                    <Button>
-                        <UserPlus class="mr-2 h-4 w-4" />
-                        Crear Usuario
-                    </Button>
+                <Link
+                    href="/admin/users/create"
+                    class="rounded-md bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
+                >
+                    Crear Usuario
                 </Link>
             </div>
 
-            <div class="rounded-md border bg-card">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Nombre</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Rol</TableHead>
-                            <TableHead>Tipo de Estudiante</TableHead>
-                            <TableHead class="text-right">Acciones</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        <TableRow v-for="user in users.data" :key="user.id">
-                            <TableCell class="font-medium">{{ user.name }}</TableCell>
-                            <TableCell>{{ user.email }}</TableCell>
-                            <TableCell>
-                                <Badge variant="outline">
-                                    {{ user.roles[0]?.name || 'Sin rol' }}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>
-                                <Badge 
+            <!-- Tabla -->
+            <div class="overflow-hidden rounded-lg bg-white shadow">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                            >
+                                Nombre
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                            >
+                                Email
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                            >
+                                Rol
+                            </th>
+                            <th
+                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
+                            >
+                                Tipo de Estudiante
+                            </th>
+                            <th
+                                class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
+                            >
+                                Acciones
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 bg-white">
+                        <tr v-for="user in users.data" :key="user.id">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="font-medium text-gray-900">
+                                    {{ user.name }}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                {{ user.email }}
+                            </td>
+                            <td class="px-6 py-4 text-sm">
+                                {{ user.roles[0]?.name || 'Sin rol' }}
+                            </td>
+                            <td class="px-6 py-4 text-sm whitespace-nowrap">
+                                <span
                                     v-if="user.student_type"
-                                    :variant="getStudentTypeVariant(user.student_type)"
+                                    :class="[
+                                        'inline-flex rounded-full px-2 text-xs leading-5 font-semibold',
+                                        user.student_type === 'external'
+                                            ? 'bg-blue-100 text-blue-800'
+                                            : 'bg-purple-100 text-purple-800',
+                                    ]"
                                 >
                                     {{ getStudentTypeBadge(user.student_type) }}
-                                </Badge>
-                                <span v-else class="text-muted-foreground text-sm">-</span>
-                            </TableCell>
-                            <TableCell class="text-right">
-                                <div class="flex justify-end gap-2">
-                                    <Link :href="`/admin/users/${user.id}/edit`">
-                                        <Button variant="ghost" size="icon">
-                                            <Edit class="h-4 w-4" />
-                                        </Button>
-                                    </Link>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        @click="deleteUser(user.id)"
-                                    >
-                                        <Trash2 class="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                        <TableRow v-if="users.data.length === 0">
-                            <TableCell colspan="5" class="text-center py-8">
-                                <p class="text-muted-foreground">No hay usuarios registrados</p>
-                            </TableCell>
-                        </TableRow>
-                    </TableBody>
-                </Table>
+                                </span>
+                                <span v-else>-</span>
+                            </td>
+                            <td
+                                class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap"
+                            >
+                                <Link
+                                    :href="`/admin/users/${user.id}/edit`"
+                                    class="mr-3 text-blue-600 hover:text-blue-900"
+                                >
+                                    Editar
+                                </Link>
+                                <button
+                                    @click="deleteUser(user.id)"
+                                    class="text-red-600 hover:text-red-900"
+                                >
+                                    Eliminar
+                                </button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-    </AuthenticatedLayout>
+    </AppLayout>
 </template>
