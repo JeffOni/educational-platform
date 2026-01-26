@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Section;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -19,6 +18,7 @@ return new class extends Migration
             $table->string('video_url'); // URL de YouTube/Vimeo o path en storage
             $table->integer('duration')->nullable(); // Duración en segundos
             $table->foreignIdFor(Section::class)->constrained()->onDelete('cascade');
+            $table->integer('order')->default(1);
             $table->boolean('is_preview')->default(false);
             $table->timestamps();
         });

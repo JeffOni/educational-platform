@@ -31,7 +31,9 @@ const deleteUser = (id: number) => {
 
 const getStudentTypeBadge = (studentType: string | null) => {
     if (!studentType) return '';
-    return studentType === 'external' ? 'Externo' : 'Interno';
+    return studentType === 'external'
+        ? 'Estudiante Externo'
+        : 'Estudiante de Academia';
 };
 
 const getStudentTypeVariant = (
@@ -86,7 +88,7 @@ const getStudentTypeVariant = (
                             <th
                                 class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
                             >
-                                Tipo de Estudiante
+                                Modalidad
                             </th>
                             <th
                                 class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"

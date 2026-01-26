@@ -17,14 +17,22 @@ class CourseController extends Controller
 {
     public function index()
     {
-        $courses = Course::where('user_id', auth()->id())
-            ->with(['category', 'level'])
-            ->withCount('sections')
-            ->latest()
+        // Si es administrador, mostrar todos los cursos
+        // Si es profesor, mostrar solo sus cursos
+        $query = Course::with(['subcategory.category', 'level', 'user'])
+            ->withCount('sections');
+
+        if (!auth()->user()->hasRole('admin')) {
+            $query->where('user_id', auth()->id());
+        }
+
+        $courses = $query->latest()
             ->get()
             ->map(function ($course) {
                 // Asegurar que status sea integer
                 $course->status = (int) $course->status;
+                // Agregar category desde subcategory para compatibilidad con la vista
+                $course->category = $course->subcategory?->category;
                 return $course;
             });
 
@@ -83,7 +91,8 @@ class CourseController extends Controller
 
     public function edit(Course $course)
     {
-        if ($course->user_id !== auth()->id()) {
+        // Permitir edición si es admin o si es el dueño del curso
+        if (!auth()->user()->hasRole('admin') && $course->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -98,7 +107,8 @@ class CourseController extends Controller
 
     public function update(Request $request, Course $course)
     {
-        if ($course->user_id !== auth()->id()) {
+        // Permitir actualización si es admin o si es el dueño del curso
+        if (!auth()->user()->hasRole('admin') && $course->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -134,7 +144,8 @@ class CourseController extends Controller
 
     public function publish(Course $course)
     {
-        if ($course->user_id !== auth()->id()) {
+        // Permitir publicación si es admin o si es el dueño del curso
+        if (!auth()->user()->hasRole('admin') && $course->user_id !== auth()->id()) {
             abort(403);
         }
 
@@ -146,7 +157,8 @@ class CourseController extends Controller
 
     public function destroy(Course $course)
     {
-        if ($course->user_id !== auth()->id()) {
+        // Permitir eliminación si es admin o si es el dueño del curso
+        if (!auth()->user()->hasRole('admin') && $course->user_id !== auth()->id()) {
             abort(403);
         }
 

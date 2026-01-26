@@ -33,11 +33,37 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('12345678')
         ])->assignRole('teacher');
 
-        // Alumno
+        // Estudiantes Externos (Solo Cursos) - 2 usuarios
         User::factory()->create([
-            'name' => 'Alumno',
+            'name' => 'Carlos Martínez',
             'email' => 'student@example.com',
-            'password' => bcrypt('12345678')
+            'password' => bcrypt('12345678'),
+            'student_type' => 'external'
         ])->assignRole('student');
+
+        User::factory()->create([
+            'name' => 'María González',
+            'email' => 'maria.gonzalez@example.com',
+            'password' => bcrypt('12345678'),
+            'student_type' => 'external'
+        ])->assignRole('student');
+
+        // Estudiantes de Academia (Cursos + Tareas) - 2 usuarios
+        User::factory()->create([
+            'name' => 'Roberto Sánchez',
+            'email' => 'roberto.sanchez@academia.edu',
+            'password' => bcrypt('12345678'),
+            'student_type' => 'internal'
+        ])->assignRole('student');
+
+        User::factory()->create([
+            'name' => 'Laura Fernández',
+            'email' => 'laura.fernandez@academia.edu',
+            'password' => bcrypt('12345678'),
+            'student_type' => 'internal'
+        ])->assignRole('student');
+
+        // Crear cursos con contenido
+        $this->call(CourseSeeder::class);
     }
 }

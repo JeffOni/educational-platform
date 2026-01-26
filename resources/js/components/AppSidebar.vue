@@ -34,68 +34,101 @@ import AppLogo from './AppLogo.vue';
 
 const page = usePage();
 const roles = computed(() => page.props.auth.roles || []);
+const user = computed(() => page.props.auth.user);
 
 const mainNavItems = computed<NavItem[]>(() => {
-    const items: NavItem[] = [
-        {
-            title: 'Dashboard',
-            href: dashboard().url,
-            icon: LayoutGrid,
-        },
-    ];
+    const items: NavItem[] = [];
 
-    if (roles.value.includes('teacher') || roles.value.includes('admin')) {
-        items.push({
-            title: 'Mis Cursos',
-            href: admin.courses.index().url,
-            icon: MonitorPlay,
-        });
-        items.push({
-            title: 'Preguntas',
-            href: admin.questions.index().url,
-            icon: MessageCircle,
-        });
-    }
-
+    // ADMIN: Acceso completo a todos los módulos
     if (roles.value.includes('admin')) {
-        items.push({
-            title: 'Usuarios',
-            href: '/admin/users',
-            icon: Users,
-        });
-        items.push({
-            title: 'Familias',
-            href: '/admin/families',
-            icon: Layers,
-        });
-        items.push({
-            title: 'Categorías',
-            href: '/admin/categories',
-            icon: Tags,
-        });
-        items.push({
-            title: 'Subcategorías',
-            href: '/admin/subcategories',
-            icon: Tags,
-        });
-        items.push({
-            title: 'Niveles',
-            href: '/admin/levels',
-            icon: Layers,
-        });
-        items.push({
-            title: 'Estadísticas',
-            href: '#', // TODO: Ruta estadísticas
-            icon: BarChart3,
-        });
+        items.push(
+            {
+                title: 'Dashboard',
+                href: dashboard().url,
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Mis Cursos',
+                href: admin.courses.index().url,
+                icon: MonitorPlay,
+            },
+            {
+                title: 'Preguntas',
+                href: admin.questions.index().url,
+                icon: MessageCircle,
+            },
+            {
+                title: 'Usuarios',
+                href: '/admin/users',
+                icon: Users,
+            },
+            {
+                title: 'Familias',
+                href: '/admin/families',
+                icon: Layers,
+            },
+            {
+                title: 'Categorías',
+                href: '/admin/categories',
+                icon: Tags,
+            },
+            {
+                title: 'Subcategorías',
+                href: '/admin/subcategories',
+                icon: Tags,
+            },
+            {
+                title: 'Niveles',
+                href: '/admin/levels',
+                icon: Layers,
+            },
+            {
+                title: 'Estadísticas',
+                href: '#', // TODO: Ruta estadísticas
+                icon: BarChart3,
+            },
+        );
     }
+    // TEACHER: Solo gestión de sus cursos y preguntas
+    else if (roles.value.includes('teacher')) {
+        items.push(
+            {
+                title: 'Dashboard',
+                href: dashboard().url,
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Mis Cursos',
+                href: admin.courses.index().url,
+                icon: MonitorPlay,
+            },
+            {
+                title: 'Preguntas',
+                href: admin.questions.index().url,
+                icon: MessageCircle,
+            },
+        );
+    }
+    // STUDENT: Panel de estudiante
+    else if (roles.value.includes('student')) {
+        items.push(
+            {
+                title: 'Dashboard',
+                href: dashboard().url,
+                icon: LayoutGrid,
+            },
+            {
+                title: 'Mis Cursos',
+                href: student.courses.index().url,
+                icon: GraduationCap,
+            },
+        );
 
-    if (roles.value.includes('student')) {
-        items.push({
-            title: 'Mis Cursos',
-            href: student.courses.index().url,
-            icon: GraduationCap,
-        });
+        // Estudiante Interno: Acceso a tareas y recursos
+        // Estudiante Externo: Solo recursos (sin sección de tareas)
+        // Nota: La diferenciación de recursos vs tareas se manejará
+        // dentro de cada curso según student_type
+
         items.push({
             title: 'Certificados',
             href: '#', // TODO: Ruta certificados

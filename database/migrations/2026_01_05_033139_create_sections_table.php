@@ -5,8 +5,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 use App\Models\Course;
 
-return new class extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      */
@@ -16,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignIdFor(Course::class)->constrained()->onDelete('cascade');
+            $table->integer('order')->default(1);
             $table->timestamps();
         });
     }

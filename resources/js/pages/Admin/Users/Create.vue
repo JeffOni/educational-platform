@@ -1,7 +1,13 @@
 <script setup lang="ts">
-import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
@@ -12,8 +18,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { ArrowLeft, Info } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
@@ -55,7 +61,7 @@ const submit = () => {
     <Head title="Crear Usuario" />
 
     <AuthenticatedLayout>
-        <div class="space-y-6 max-w-2xl">
+        <div class="max-w-2xl space-y-6">
             <div class="flex items-center gap-4">
                 <Link href="/admin/users">
                     <Button variant="ghost" size="icon">
@@ -63,7 +69,9 @@ const submit = () => {
                     </Button>
                 </Link>
                 <div>
-                    <h2 class="text-3xl font-bold tracking-tight">Crear Usuario</h2>
+                    <h2 class="text-3xl font-bold tracking-tight">
+                        Crear Usuario
+                    </h2>
                     <p class="text-muted-foreground">
                         Registra un nuevo usuario en el sistema
                     </p>
@@ -87,7 +95,10 @@ const submit = () => {
                                 type="text"
                                 required
                             />
-                            <p v-if="form.errors.name" class="text-sm text-destructive">
+                            <p
+                                v-if="form.errors.name"
+                                class="text-sm text-destructive"
+                            >
                                 {{ form.errors.name }}
                             </p>
                         </div>
@@ -100,7 +111,10 @@ const submit = () => {
                                 type="email"
                                 required
                             />
-                            <p v-if="form.errors.email" class="text-sm text-destructive">
+                            <p
+                                v-if="form.errors.email"
+                                class="text-sm text-destructive"
+                            >
                                 {{ form.errors.email }}
                             </p>
                         </div>
@@ -114,13 +128,18 @@ const submit = () => {
                                     type="password"
                                     required
                                 />
-                                <p v-if="form.errors.password" class="text-sm text-destructive">
+                                <p
+                                    v-if="form.errors.password"
+                                    class="text-sm text-destructive"
+                                >
                                     {{ form.errors.password }}
                                 </p>
                             </div>
 
                             <div class="space-y-2">
-                                <Label for="password_confirmation">Confirmar Contraseña</Label>
+                                <Label for="password_confirmation"
+                                    >Confirmar Contraseña</Label
+                                >
                                 <Input
                                     id="password_confirmation"
                                     v-model="form.password_confirmation"
@@ -134,7 +153,9 @@ const submit = () => {
                             <Label for="role">Rol del Usuario</Label>
                             <Select v-model="selectedRole" required>
                                 <SelectTrigger>
-                                    <SelectValue placeholder="Selecciona un rol" />
+                                    <SelectValue
+                                        placeholder="Selecciona un rol"
+                                    />
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem
@@ -142,57 +163,106 @@ const submit = () => {
                                         :key="role.name"
                                         :value="role.name"
                                     >
-                                        {{ role.name.charAt(0).toUpperCase() + role.name.slice(1) }}
+                                        {{
+                                            role.name.charAt(0).toUpperCase() +
+                                            role.name.slice(1)
+                                        }}
                                     </SelectItem>
                                 </SelectContent>
                             </Select>
-                            <p v-if="form.errors.role" class="text-sm text-destructive">
+                            <p
+                                v-if="form.errors.role"
+                                class="text-sm text-destructive"
+                            >
                                 {{ form.errors.role }}
                             </p>
                         </div>
 
-                        <!-- Tipo de Estudiante (solo si el rol es student) -->
-                        <div v-if="selectedRole === 'student'" class="space-y-4">
-                            <Label>Tipo de Estudiante</Label>
-                            
+                        <!-- Modalidad de Estudiante (solo si el rol es student) -->
+                        <div
+                            v-if="selectedRole === 'student'"
+                            class="space-y-4"
+                        >
+                            <Label>Modalidad de Estudiante</Label>
+
                             <Alert>
                                 <Info class="h-4 w-4" />
                                 <AlertDescription>
-                                    Selecciona el tipo de estudiante según su origen y capacidades
+                                    Selecciona la modalidad según el tipo de
+                                    acceso y permisos
                                 </AlertDescription>
                             </Alert>
 
-                            <RadioGroup v-model="form.student_type" class="space-y-3">
-                                <div class="flex items-start space-x-3 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                                    <RadioGroupItem value="external" id="external" class="mt-1" />
+                            <RadioGroup
+                                v-model="form.student_type"
+                                class="space-y-3"
+                            >
+                                <div
+                                    class="flex items-start space-x-3 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
+                                >
+                                    <RadioGroupItem
+                                        value="external"
+                                        id="external"
+                                        class="mt-1"
+                                    />
                                     <div class="flex-1">
-                                        <Label for="external" class="cursor-pointer font-medium">
-                                            Estudiante Externo
+                                        <Label
+                                            for="external"
+                                            class="cursor-pointer font-medium"
+                                        >
+                                            Estudiante Externo (Solo Cursos)
                                         </Label>
-                                        <p class="text-sm text-muted-foreground mt-1">
-                                            Estudiantes que se registran por su cuenta. Pueden comprar cursos, 
-                                            ver contenido, escribir comentarios y acceder a recursos. 
-                                            <strong>No pueden enviar tareas ni recibir calificaciones.</strong>
+                                        <p
+                                            class="mt-1 text-sm text-muted-foreground"
+                                        >
+                                            Estudiantes que se registran por su
+                                            cuenta. Pueden comprar cursos, ver
+                                            contenido, escribir comentarios y
+                                            acceder a recursos.
+                                            <strong
+                                                >No pueden enviar tareas ni
+                                                recibir calificaciones.</strong
+                                            >
                                         </p>
                                     </div>
                                 </div>
 
-                                <div class="flex items-start space-x-3 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
-                                    <RadioGroupItem value="internal" id="internal" class="mt-1" />
+                                <div
+                                    class="flex items-start space-x-3 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
+                                >
+                                    <RadioGroupItem
+                                        value="internal"
+                                        id="internal"
+                                        class="mt-1"
+                                    />
                                     <div class="flex-1">
-                                        <Label for="internal" class="cursor-pointer font-medium">
-                                            Estudiante Interno
+                                        <Label
+                                            for="internal"
+                                            class="cursor-pointer font-medium"
+                                        >
+                                            Estudiante de Academia (Cursos +
+                                            Tareas)
                                         </Label>
-                                        <p class="text-sm text-muted-foreground mt-1">
-                                            Estudiantes institucionales o por convenio. Tienen todas las 
-                                            funciones del estudiante externo <strong>más la capacidad de 
-                                            enviar tareas y recibir calificaciones.</strong>
+                                        <p
+                                            class="mt-1 text-sm text-muted-foreground"
+                                        >
+                                            Estudiantes institucionales o por
+                                            convenio. Tienen todas las funciones
+                                            del estudiante externo
+                                            <strong
+                                                >más la capacidad de enviar
+                                                tareas y recibir
+                                                calificaciones.</strong
+                                            >
                                         </p>
                                     </div>
                                 </div>
                             </RadioGroup>
 
-                            <p v-if="form.errors.student_type" class="text-sm text-destructive">
+                            <p
+                                v-if="form.errors.student_type"
+                                class="text-sm text-destructive"
+                            >
                                 {{ form.errors.student_type }}
                             </p>
                         </div>
@@ -204,7 +274,11 @@ const submit = () => {
                                 </Button>
                             </Link>
                             <Button type="submit" :disabled="form.processing">
-                                {{ form.processing ? 'Creando...' : 'Crear Usuario' }}
+                                {{
+                                    form.processing
+                                        ? 'Creando...'
+                                        : 'Crear Usuario'
+                                }}
                             </Button>
                         </div>
                     </CardContent>

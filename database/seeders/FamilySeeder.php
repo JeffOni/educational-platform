@@ -15,6 +15,10 @@ class FamilySeeder extends Seeder
             'Negocios',
             'Diseño',
             'Ciencias',
+            'Marketing',
+            'Idiomas',
+            'Desarrollo Personal',
+            'Arte y Música',
         ];
 
         foreach ($families as $family) {
