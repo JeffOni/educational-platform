@@ -35,7 +35,6 @@ class UserController extends Controller
             'email' => 'required|email|unique:users,email',
             'password' => 'required|string|min:8|confirmed',
             'role' => 'required|exists:roles,name',
-            'student_type' => 'nullable|in:external,internal',
         ]);
 
         $data = [
@@ -44,9 +43,9 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
         ];
 
-        // Solo agregar student_type si el rol es student
-        if ($request->role === 'student' && $request->filled('student_type')) {
-            $data['student_type'] = $request->student_type;
+        // Admin siempre crea estudiantes internos
+        if ($request->role === 'student') {
+            $data['student_type'] = 'internal';
         }
 
         $user = User::create($data);

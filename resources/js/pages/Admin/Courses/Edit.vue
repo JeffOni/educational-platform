@@ -5,6 +5,7 @@ import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import Curriculum from './Partials/Curriculum.vue';
+import Delegations from './Partials/Delegations.vue';
 
 interface Family {
     id: number;
@@ -28,6 +29,12 @@ interface Level {
     name: string;
 }
 
+interface Teacher {
+    id: number;
+    name: string;
+    email: string;
+}
+
 interface Course {
     id: number;
     title: string;
@@ -38,6 +45,7 @@ interface Course {
     category_id: number | null;
     subcategory_id: number | null;
     level_id: number;
+    user_id: number;
     image_path: string | null;
     status: number;
     sections: any[];
@@ -49,6 +57,11 @@ interface Props {
     categories: Category[];
     subcategories: Subcategory[];
     levels: Level[];
+    teachers: Teacher[];
+    auth: {
+        user: { id: number };
+        roles: string[];
+    };
 }
 
 const props = defineProps<Props>();
@@ -63,6 +76,7 @@ const form = useForm({
     subcategory_id: props.course.subcategory_id || '',
     level_id: props.course.level_id,
     status: props.course.status,
+    user_id: props.course.user_id,
     image: null as File | null,
 });
 
@@ -169,13 +183,14 @@ const breadcrumbs = [
 
             <!-- Tabs -->
             <Tabs default-value="info" class="w-full">
-                <TabsList class="grid w-full grid-cols-2">
+                <TabsList class="grid w-full grid-cols-3">
                     <TabsTrigger value="info"
                         >Información del Curso</TabsTrigger
                     >
                     <TabsTrigger value="curriculum"
                         >Contenido del Curso</TabsTrigger
                     >
+                    <TabsTrigger value="delegations">Delegaciones</TabsTrigger>
                 </TabsList>
 
                 <!-- Tab: Información -->
@@ -455,6 +470,33 @@ const breadcrumbs = [
                                         </select>
                                     </div>
 
+                                    <!-- Profesor Titular (solo admin) -->
+                                    <div v-if="auth.roles.includes('admin')">
+                                        <label
+                                            class="mb-2 block text-sm font-semibold text-blue-700"
+                                            >Profesor Titular *</label
+                                        >
+                                        <select
+                                            v-model="form.user_id"
+                                            class="w-full rounded-md border border-blue-300 bg-blue-50 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                            required
+                                        >
+                                            <option
+                                                v-for="teacher in teachers"
+                                                :key="teacher.id"
+                                                :value="teacher.id"
+                                            >
+                                                {{ teacher.name }} ({{
+                                                    teacher.email
+                                                }})
+                                            </option>
+                                        </select>
+                                        <p class="mt-1 text-xs text-gray-500">
+                                            Solo admin puede cambiar el profesor
+                                            titular
+                                        </p>
+                                    </div>
+
                                     <!-- Estado -->
                                     <div>
                                         <label
@@ -505,6 +547,16 @@ const breadcrumbs = [
                 </TabsContent>
 
                 <!-- Tab: Curriculum -->
+
+                <!-- Tab: Delegaciones -->
+                <TabsContent value="delegations">
+                    <Delegations
+                        :course="course"
+                        :teachers="teachers"
+                        :is-owner="auth.user.id === course.user_id"
+                        :is-admin="auth.roles.includes('admin')"
+                    />
+                </TabsContent>
                 <TabsContent value="curriculum">
                     <Curriculum :course="course" />
                 </TabsContent>

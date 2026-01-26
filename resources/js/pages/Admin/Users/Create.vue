@@ -10,7 +10,6 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import {
     Select,
     SelectContent,
@@ -39,7 +38,7 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     role: '',
-    student_type: 'external',
+    student_type: 'internal', // Admin siempre crea internos
 });
 
 const selectedRole = ref('');
@@ -48,7 +47,7 @@ watch(selectedRole, (newRole) => {
     form.role = newRole;
     // Si no es student, limpiar el tipo
     if (newRole !== 'student') {
-        form.student_type = 'external';
+        form.student_type = 'internal';
     }
 });
 
@@ -178,93 +177,29 @@ const submit = () => {
                             </p>
                         </div>
 
-                        <!-- Modalidad de Estudiante (solo si el rol es student) -->
+                        <!-- Información sobre estudiantes internos -->
                         <div
                             v-if="selectedRole === 'student'"
                             class="space-y-4"
                         >
-                            <Label>Modalidad de Estudiante</Label>
-
-                            <Alert>
-                                <Info class="h-4 w-4" />
-                                <AlertDescription>
-                                    Selecciona la modalidad según el tipo de
-                                    acceso y permisos
+                            <Alert class="border-blue-200 bg-blue-50">
+                                <Info class="h-4 w-4 text-blue-600" />
+                                <AlertDescription class="text-blue-900">
+                                    Los estudiantes creados desde el panel de
+                                    administración son
+                                    <strong
+                                        >Estudiantes de Academia
+                                        (Internos)</strong
+                                    >
+                                    con acceso completo a cursos, tareas y
+                                    calificaciones.
+                                    <br />
+                                    Los
+                                    <strong>Estudiantes Externos</strong> solo
+                                    pueden registrarse desde la página pública
+                                    de registro.
                                 </AlertDescription>
                             </Alert>
-
-                            <RadioGroup
-                                v-model="form.student_type"
-                                class="space-y-3"
-                            >
-                                <div
-                                    class="flex items-start space-x-3 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
-                                >
-                                    <RadioGroupItem
-                                        value="external"
-                                        id="external"
-                                        class="mt-1"
-                                    />
-                                    <div class="flex-1">
-                                        <Label
-                                            for="external"
-                                            class="cursor-pointer font-medium"
-                                        >
-                                            Estudiante Externo (Solo Cursos)
-                                        </Label>
-                                        <p
-                                            class="mt-1 text-sm text-muted-foreground"
-                                        >
-                                            Estudiantes que se registran por su
-                                            cuenta. Pueden comprar cursos, ver
-                                            contenido, escribir comentarios y
-                                            acceder a recursos.
-                                            <strong
-                                                >No pueden enviar tareas ni
-                                                recibir calificaciones.</strong
-                                            >
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="flex items-start space-x-3 rounded-lg border bg-card p-4 transition-colors hover:bg-accent/50"
-                                >
-                                    <RadioGroupItem
-                                        value="internal"
-                                        id="internal"
-                                        class="mt-1"
-                                    />
-                                    <div class="flex-1">
-                                        <Label
-                                            for="internal"
-                                            class="cursor-pointer font-medium"
-                                        >
-                                            Estudiante de Academia (Cursos +
-                                            Tareas)
-                                        </Label>
-                                        <p
-                                            class="mt-1 text-sm text-muted-foreground"
-                                        >
-                                            Estudiantes institucionales o por
-                                            convenio. Tienen todas las funciones
-                                            del estudiante externo
-                                            <strong
-                                                >más la capacidad de enviar
-                                                tareas y recibir
-                                                calificaciones.</strong
-                                            >
-                                        </p>
-                                    </div>
-                                </div>
-                            </RadioGroup>
-
-                            <p
-                                v-if="form.errors.student_type"
-                                class="text-sm text-destructive"
-                            >
-                                {{ form.errors.student_type }}
-                            </p>
                         </div>
 
                         <div class="flex justify-end gap-2 pt-4">

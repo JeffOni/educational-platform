@@ -25,11 +25,21 @@ interface Level {
     name: string;
 }
 
+interface Teacher {
+    id: number;
+    name: string;
+    email: string;
+}
+
 interface Props {
     families: Family[];
     categories: Category[];
     subcategories: Subcategory[];
     levels: Level[];
+    teachers: Teacher[];
+    auth: {
+        roles: string[];
+    };
 }
 
 const props = defineProps<Props>();
@@ -43,6 +53,7 @@ const form = useForm({
     category_id: '',
     subcategory_id: '',
     level_id: '',
+    user_id: '',
     image: null as File | null,
 });
 
@@ -337,6 +348,57 @@ const breadcrumbs = [
                                 </div>
 
                                 <!-- Nivel -->
+                                <div>
+                                    <label
+                                        class="mb-2 block text-sm font-semibold"
+                                        >Nivel *</label
+                                    >
+                                    <select
+                                        v-model="form.level_id"
+                                        class="w-full rounded-md border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                        required
+                                    >
+                                        <option value="">
+                                            Seleccione un nivel
+                                        </option>
+                                        <option
+                                            v-for="level in levels"
+                                            :key="level.id"
+                                            :value="level.id"
+                                        >
+                                            {{ level.name }}
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <!-- Profesor Titular (solo admin) -->
+                                <div v-if="auth.roles.includes('admin')">
+                                    <label
+                                        class="mb-2 block text-sm font-semibold text-blue-700"
+                                        >Profesor Titular</label
+                                    >
+                                    <select
+                                        v-model="form.user_id"
+                                        class="w-full rounded-md border border-blue-300 bg-blue-50 px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
+                                    >
+                                        <option value="">
+                                            Asignar a mí mismo
+                                        </option>
+                                        <option
+                                            v-for="teacher in teachers"
+                                            :key="teacher.id"
+                                            :value="teacher.id"
+                                        >
+                                            {{ teacher.name }} ({{
+                                                teacher.email
+                                            }})
+                                        </option>
+                                    </select>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Si no seleccionas, el curso se asignará
+                                        a ti
+                                    </p>
+                                </div>
                                 <div>
                                     <label
                                         class="mb-2 block text-sm font-semibold"
