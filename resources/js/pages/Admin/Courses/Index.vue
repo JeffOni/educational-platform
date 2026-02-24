@@ -28,7 +28,6 @@ interface Course {
     id: number;
     title: string;
     subtitle: string;
-    price: number;
     status: number;
     image_path: string | null;
     category: Category;
@@ -124,7 +123,6 @@ const breadcrumbs = [
                                 <TableHead>Curso</TableHead>
                                 <TableHead>Categoría</TableHead>
                                 <TableHead>Nivel</TableHead>
-                                <TableHead>Precio</TableHead>
                                 <TableHead>Secciones</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead class="text-right"
@@ -178,11 +176,6 @@ const breadcrumbs = [
                                     <Badge variant="outline">{{
                                         course.level.name
                                     }}</Badge>
-                                </TableCell>
-                                <TableCell>
-                                    <span class="font-semibold"
-                                        >${{ course.price }}</span
-                                    >
                                 </TableCell>
                                 <TableCell class="text-center">
                                     <Badge variant="secondary">{{

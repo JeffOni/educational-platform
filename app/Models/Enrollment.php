@@ -20,4 +20,14 @@ class Enrollment extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function enrollmentCode()
+    {
+        return $this->belongsTo(EnrollmentCode::class);
+    }
+
+    public function certificate()
+    {
+        return $this->hasOne(Certificate::class);
+    }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\Certificate;
 use App\Models\Enrollment;
 use App\Models\LessonAssignment;
 use App\Models\Course;
@@ -20,7 +21,7 @@ class DashboardController extends Controller
         $enrolledCourses = Enrollment::where('user_id', $user->id)
             ->with([
                 'course' => function ($query) {
-                    $query->with(['user', 'sections.lessons']);
+                    $query->with(['user', 'sections.lessons', 'exam']);
                 }
             ])
             ->get()
@@ -38,6 +39,15 @@ class DashboardController extends Controller
 
                 $progress = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
 
+                // Verificar si tiene examen y si lo aprobó
+                $hasExam = $course->exam && $course->exam->is_active;
+                $examPassed = $hasExam && $course->exam->userHasPassingAttempt($user);
+
+                // Verificar si tiene certificado
+                $certificate = Certificate::where('user_id', $user->id)
+                    ->where('course_id', $course->id)
+                    ->first();
+
                 return [
                     'id' => $course->id,
                     'title' => $course->title,
@@ -48,6 +58,12 @@ class DashboardController extends Controller
                     'instructor' => [
                         'name' => $course->user->name,
                     ],
+                    'has_exam' => $hasExam,
+                    'exam_passed' => $examPassed,
+                    'certificate' => $certificate ? [
+                        'id' => $certificate->id,
+                        'file_path' => $certificate->file_path,
+                    ] : null,
                     'last_accessed' => $enrollment->updated_at,
                 ];
             });
@@ -69,22 +85,24 @@ class DashboardController extends Controller
 
         // Estadísticas
         $completedCourses = $enrolledCourses->filter(function ($course) {
-            return $course['progress'] === 100;
+            return $course['progress'] === 100 && $course['exam_passed'];
         })->count();
 
-        // Calcular horas totales (estimación basada en duración de lecciones completadas)
+        $totalCertificates = Certificate::where('user_id', $user->id)->count();
+
+        // Calcular horas totales
         $totalHours = DB::table('lesson_user')
             ->join('lessons', 'lesson_user.lesson_id', '=', 'lessons.id')
             ->where('lesson_user.user_id', $user->id)
             ->sum('lessons.duration');
 
-        $totalHours = $totalHours ? round($totalHours / 3600) : 0; // Convertir segundos a horas
+        $totalHours = $totalHours ? round($totalHours / 3600) : 0;
 
         $stats = [
             'total_courses' => $enrolledCourses->count(),
             'completed_courses' => $completedCourses,
             'total_hours' => $totalHours,
-            'certificates' => $completedCourses, // Por ahora igual a cursos completados
+            'certificates' => $totalCertificates,
         ];
 
         return Inertia::render('Student/Dashboard', [

@@ -1,9 +1,33 @@
 <script setup lang="ts">
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import StudentLayout from '@/layouts/StudentLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { BookOpen, GraduationCap } from 'lucide-vue-next';
+
+interface Enrollment {
+    id: number;
+    course: {
+        id: number;
+        title: string;
+        image_path: string | null;
+        teacher: {
+            name: string;
+        };
+    };
+    progress: number;
+    total_lessons: number;
+    completed_lessons: number;
+}
 
 defineProps<{
-    enrolledCourses: Array<any>;
+    enrolledCourses: Enrollment[];
 }>();
 </script>
 
@@ -11,106 +35,94 @@ defineProps<{
     <Head title="Mis Cursos" />
 
     <StudentLayout>
-        <div>
-            <div>
-                <div
-                    class="overflow-hidden bg-white p-6 shadow-sm sm:rounded-lg dark:bg-gray-800"
+        <div class="mb-8">
+            <h1 class="text-3xl font-bold text-gray-900">Mis Cursos</h1>
+            <p class="mt-2 text-gray-600">
+                Todos los cursos en los que estás inscrito
+            </p>
+        </div>
+
+        <div v-if="enrolledCourses.length === 0">
+            <Card>
+                <CardContent class="py-16 text-center">
+                    <BookOpen class="mx-auto h-16 w-16 text-gray-300" />
+                    <p class="mt-4 text-lg font-medium text-gray-600">
+                        Aún no estás inscrito en ningún curso
+                    </p>
+                    <p class="mt-1 text-sm text-gray-500">
+                        Utiliza un código de inscripción para acceder a un curso
+                    </p>
+                </CardContent>
+            </Card>
+        </div>
+
+        <div
+            v-else
+            class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+        >
+            <Link
+                v-for="enrollment in enrolledCourses"
+                :key="enrollment.id"
+                :href="'/student/courses/' + enrollment.course.id"
+                class="group block"
+            >
+                <Card
+                    class="overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
                 >
-                    <h1
-                        class="mb-8 text-3xl font-bold text-gray-900 dark:text-gray-100"
-                    >
-                        Mis Cursos
-                    </h1>
-
-                    <div
-                        v-if="enrolledCourses.length === 0"
-                        class="py-20 text-center"
-                    >
-                        <div class="mb-4 text-6xl">📚</div>
-                        <p
-                            class="mb-4 text-xl text-gray-500 dark:text-gray-400"
+                    <div class="relative h-40 overflow-hidden bg-gray-100">
+                        <img
+                            v-if="enrollment.course.image_path"
+                            :src="'/storage/' + enrollment.course.image_path"
+                            :alt="enrollment.course.title"
+                            class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                        <div
+                            v-else
+                            class="flex h-full w-full items-center justify-center"
                         >
-                            Aún no tienes cursos comprados.
-                        </p>
-                        <Link
-                            href="/"
-                            class="font-semibold text-indigo-600 hover:text-indigo-800"
-                        >
-                            Explorar cursos disponibles →
-                        </Link>
+                            <GraduationCap class="h-12 w-12 text-gray-300" />
+                        </div>
                     </div>
-
-                    <div
-                        v-else
-                        class="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-                    >
-                        <Link
-                            :href="'/student/courses/' + enrollment.course.id"
-                            v-for="enrollment in enrolledCourses"
-                            :key="enrollment.id"
-                            class="group overflow-hidden rounded-xl border border-gray-200 bg-gray-50 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl dark:border-gray-700 dark:bg-gray-900"
+                    <CardHeader class="pb-3">
+                        <CardDescription>
+                            {{ enrollment.course.teacher.name }}
+                        </CardDescription>
+                        <CardTitle
+                            class="line-clamp-2 text-lg transition-colors group-hover:text-blue-600"
                         >
+                            {{ enrollment.course.title }}
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div>
                             <div
-                                class="relative h-40 overflow-hidden bg-gray-200 dark:bg-gray-800"
+                                class="mb-2 flex justify-between text-xs text-gray-600"
                             >
-                                <img
-                                    v-if="enrollment.course.image_path"
-                                    :src="
-                                        '/storage/' +
-                                        enrollment.course.image_path
-                                    "
-                                    :alt="enrollment.course.title"
-                                    class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
-                                <div
-                                    v-else
-                                    class="flex h-full w-full items-center justify-center text-gray-400"
+                                <span
+                                    >{{ enrollment.completed_lessons }}/{{
+                                        enrollment.total_lessons
+                                    }}
+                                    lecciones</span
                                 >
-                                    <span class="text-5xl">📚</span>
-                                </div>
+                                <span class="font-medium text-blue-600"
+                                    >{{ enrollment.progress }}%</span
+                                >
                             </div>
-
-                            <div class="p-5">
-                                <p
-                                    class="mb-2 text-xs text-gray-500 dark:text-gray-400"
-                                >
-                                    {{ enrollment.course.teacher.name }}
-                                </p>
-                                <h3
-                                    class="mb-2 line-clamp-2 text-lg font-bold text-gray-900 transition-colors group-hover:text-indigo-600 dark:text-gray-100 dark:group-hover:text-indigo-400"
-                                >
-                                    {{ enrollment.course.title }}
-                                </h3>
-
-                                <!-- Barra de progreso (placeholder por ahora) -->
-                                <div class="mt-4">
-                                    <div
-                                        class="mb-1 flex justify-between text-xs text-gray-600 dark:text-gray-400"
-                                    >
-                                        <span>Progreso</span>
-                                        <span>0%</span>
-                                    </div>
-                                    <div
-                                        class="h-2 w-full rounded-full bg-gray-200 dark:bg-gray-700"
-                                    >
-                                        <div
-                                            class="h-2 rounded-full bg-indigo-600"
-                                            style="width: 0%"
-                                        ></div>
-                                    </div>
-                                </div>
-
-                                <div
-                                    class="mt-4 flex items-center gap-1 text-sm font-semibold text-indigo-600 dark:text-indigo-400"
-                                >
-                                    Continuar curso
-                                    <span>→</span>
-                                </div>
-                            </div>
-                        </Link>
-                    </div>
-                </div>
-            </div>
+                            <Progress :model-value="enrollment.progress" />
+                        </div>
+                        <div
+                            class="mt-4 flex items-center gap-1 text-sm font-semibold text-blue-600"
+                        >
+                            {{
+                                enrollment.progress > 0
+                                    ? 'Continuar curso'
+                                    : 'Comenzar curso'
+                            }}
+                            <span>&rarr;</span>
+                        </div>
+                    </CardContent>
+                </Card>
+            </Link>
         </div>
     </StudentLayout>
 </template>

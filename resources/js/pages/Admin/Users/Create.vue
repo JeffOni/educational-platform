@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
     Card,
@@ -19,7 +18,7 @@ import {
 } from '@/components/ui/select';
 import AuthenticatedLayout from '@/layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
-import { ArrowLeft, Info } from 'lucide-vue-next';
+import { ArrowLeft } from 'lucide-vue-next';
 import { ref, watch } from 'vue';
 
 interface Role {
@@ -38,17 +37,12 @@ const form = useForm({
     password: '',
     password_confirmation: '',
     role: '',
-    student_type: 'internal', // Admin siempre crea internos
 });
 
 const selectedRole = ref('');
 
 watch(selectedRole, (newRole) => {
     form.role = newRole;
-    // Si no es student, limpiar el tipo
-    if (newRole !== 'student') {
-        form.student_type = 'internal';
-    }
 });
 
 const submit = () => {
@@ -175,31 +169,6 @@ const submit = () => {
                             >
                                 {{ form.errors.role }}
                             </p>
-                        </div>
-
-                        <!-- Información sobre estudiantes internos -->
-                        <div
-                            v-if="selectedRole === 'student'"
-                            class="space-y-4"
-                        >
-                            <Alert class="border-blue-200 bg-blue-50">
-                                <Info class="h-4 w-4 text-blue-600" />
-                                <AlertDescription class="text-blue-900">
-                                    Los estudiantes creados desde el panel de
-                                    administración son
-                                    <strong
-                                        >Estudiantes de Academia
-                                        (Internos)</strong
-                                    >
-                                    con acceso completo a cursos, tareas y
-                                    calificaciones.
-                                    <br />
-                                    Los
-                                    <strong>Estudiantes Externos</strong> solo
-                                    pueden registrarse desde la página pública
-                                    de registro.
-                                </AlertDescription>
-                            </Alert>
                         </div>
 
                         <div class="flex justify-end gap-2 pt-4">

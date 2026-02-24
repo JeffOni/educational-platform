@@ -48,7 +48,6 @@ const form = useForm({
     title: '',
     subtitle: '',
     description: '',
-    price: 0,
     family_id: '',
     category_id: '',
     subcategory_id: '',
@@ -284,22 +283,6 @@ const breadcrumbs = [
                                             {{ sub.name }}
                                         </option>
                                     </select>
-                                </div>
-
-                                <!-- Precio -->
-                                <div>
-                                    <label
-                                        class="mb-2 block text-sm font-semibold"
-                                        >Precio *</label
-                                    >
-                                    <input
-                                        v-model="form.price"
-                                        type="number"
-                                        step="0.01"
-                                        placeholder="Precio del Curso"
-                                        class="w-full rounded-md border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                        required
-                                    />
                                 </div>
 
                                 <!-- Título -->

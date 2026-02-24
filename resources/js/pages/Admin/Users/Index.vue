@@ -6,7 +6,6 @@ interface User {
     id: number;
     name: string;
     email: string;
-    student_type: string | null;
     roles: Array<{ name: string }>;
 }
 
@@ -29,19 +28,6 @@ const deleteUser = (id: number) => {
     }
 };
 
-const getStudentTypeBadge = (studentType: string | null) => {
-    if (!studentType) return '';
-    return studentType === 'external'
-        ? 'Estudiante Externo'
-        : 'Estudiante de Academia';
-};
-
-const getStudentTypeVariant = (
-    studentType: string | null,
-): 'default' | 'secondary' | 'outline' => {
-    if (!studentType) return 'default';
-    return studentType === 'external' ? 'outline' : 'default';
-};
 </script>
 
 <template>
@@ -86,11 +72,6 @@ const getStudentTypeVariant = (
                                 Rol
                             </th>
                             <th
-                                class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase"
-                            >
-                                Modalidad
-                            </th>
-                            <th
                                 class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase"
                             >
                                 Acciones
@@ -109,20 +90,6 @@ const getStudentTypeVariant = (
                             </td>
                             <td class="px-6 py-4 text-sm">
                                 {{ user.roles[0]?.name || 'Sin rol' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm whitespace-nowrap">
-                                <span
-                                    v-if="user.student_type"
-                                    :class="[
-                                        'inline-flex rounded-full px-2 text-xs leading-5 font-semibold',
-                                        user.student_type === 'external'
-                                            ? 'bg-blue-100 text-blue-800'
-                                            : 'bg-purple-100 text-purple-800',
-                                    ]"
-                                >
-                                    {{ getStudentTypeBadge(user.student_type) }}
-                                </span>
-                                <span v-else>-</span>
                             </td>
                             <td
                                 class="px-6 py-4 text-right text-sm font-medium whitespace-nowrap"

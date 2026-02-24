@@ -59,7 +59,6 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
             'family_id' => 'nullable|exists:families,id',
             'category_id' => 'nullable|exists:categories,id',
             'subcategory_id' => 'nullable|exists:subcategories,id',
@@ -77,7 +76,6 @@ class CourseController extends Controller
             'title' => $request->title,
             'subtitle' => $request->subtitle,
             'description' => $request->description,
-            'price' => $request->price,
             'family_id' => $request->family_id,
             'category_id' => $request->category_id,
             'subcategory_id' => $request->subcategory_id,
@@ -125,7 +123,6 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'subtitle' => 'required|string|max:255',
             'description' => 'required|string',
-            'price' => 'required|numeric',
             'family_id' => 'nullable|exists:families,id',
             'category_id' => 'nullable|exists:categories,id',
             'subcategory_id' => 'nullable|exists:subcategories,id',
@@ -135,7 +132,7 @@ class CourseController extends Controller
             'image' => 'nullable|image|max:2048',
         ]);
 
-        $data = $request->only(['title', 'subtitle', 'description', 'price', 'family_id', 'category_id', 'subcategory_id', 'level_id', 'status']);
+        $data = $request->only(['title', 'subtitle', 'description', 'family_id', 'category_id', 'subcategory_id', 'level_id', 'status']);
 
         // Solo admin puede cambiar el profesor titular
         if (auth()->user()->hasRole('admin') && $request->filled('user_id')) {

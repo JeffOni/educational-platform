@@ -23,6 +23,7 @@ import {
     ClipboardList,
     Folder,
     GraduationCap,
+    KeyRound,
     Layers,
     LayoutGrid,
     MessageCircle,
@@ -36,6 +37,8 @@ import AppLogo from './AppLogo.vue';
 const page = usePage();
 const roles = computed(() => page.props.auth.roles || []);
 const user = computed(() => page.props.auth.user);
+const notifications = computed(() => (page.props as any).notifications || { pendingQuestions: 0, studentNotifications: [] });
+const pendingQuestions = computed(() => notifications.value.pendingQuestions || 0);
 
 const mainNavItems = computed<NavItem[]>(() => {
     const items: NavItem[] = [];
@@ -62,11 +65,21 @@ const mainNavItems = computed<NavItem[]>(() => {
                 title: 'Preguntas',
                 href: admin.questions.index().url,
                 icon: MessageCircle,
-            },
-            {
+                badge: pendingQuestions.value,
+            },            {
                 title: 'Usuarios',
                 href: '/admin/users',
                 icon: Users,
+            },
+            {
+                title: 'Códigos de Inscripción',
+                href: '/admin/enrollment-codes',
+                icon: KeyRound,
+            },
+            {
+                title: 'Certificados',
+                href: '/admin/certificates',
+                icon: Award,
             },
             {
                 title: 'Familias',
@@ -117,8 +130,8 @@ const mainNavItems = computed<NavItem[]>(() => {
                 title: 'Preguntas',
                 href: admin.questions.index().url,
                 icon: MessageCircle,
-            },
-        );
+                badge: pendingQuestions.value,
+            },        );
     }
     // STUDENT: Panel de estudiante
     else if (roles.value.includes('student')) {
@@ -134,11 +147,6 @@ const mainNavItems = computed<NavItem[]>(() => {
                 icon: GraduationCap,
             },
         );
-
-        // Estudiante Interno: Acceso a tareas y recursos
-        // Estudiante Externo: Solo recursos (sin sección de tareas)
-        // Nota: La diferenciación de recursos vs tareas se manejará
-        // dentro de cada curso según student_type
 
         items.push({
             title: 'Certificados',

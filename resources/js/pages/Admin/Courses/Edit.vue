@@ -40,7 +40,6 @@ interface Course {
     title: string;
     subtitle: string;
     description: string;
-    price: number;
     family_id: number | null;
     category_id: number | null;
     subcategory_id: number | null;
@@ -70,7 +69,6 @@ const form = useForm({
     title: props.course.title,
     subtitle: props.course.subtitle,
     description: props.course.description,
-    price: props.course.price,
     family_id: props.course.family_id || '',
     category_id: props.course.category_id || '',
     subcategory_id: props.course.subcategory_id || '',
@@ -383,22 +381,6 @@ const breadcrumbs = [
                                                 {{ sub.name }}
                                             </option>
                                         </select>
-                                    </div>
-
-                                    <!-- Precio -->
-                                    <div>
-                                        <label
-                                            class="mb-2 block text-sm font-semibold"
-                                            >Precio *</label
-                                        >
-                                        <input
-                                            v-model="form.price"
-                                            type="number"
-                                            step="0.01"
-                                            placeholder="Precio del Curso"
-                                            class="w-full rounded-md border px-3 py-2 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none"
-                                            required
-                                        />
                                     </div>
 
                                     <!-- Título -->

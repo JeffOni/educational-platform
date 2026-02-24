@@ -16,8 +16,8 @@ class LessonController extends Controller
         $enrollment = auth()->user()->enrollments()->where('course_id', $course->id)->first();
 
         if (!$enrollment && !$lesson->is_preview) {
-            return redirect()->route('courses.show', $course)
-                ->with('error', 'Debes comprar el curso para acceder a esta lección');
+            return redirect("/student/courses/{$course->id}")
+                ->with('error', 'Debes estar inscrito en el curso para acceder a esta lección');
         }
 
         // Cargar curso completo con curriculum

@@ -13,21 +13,69 @@ import {
     Award,
     Bell,
     BookOpen,
+    Check,
     GraduationCap,
     LayoutDashboard,
     LogOut,
     Menu,
+    MessageCircle,
     Plus,
     Search,
     Settings,
-    ShoppingCart,
     User,
     X,
 } from 'lucide-vue-next';
-import { computed, ref } from 'vue';
+import { computed, onMounted, ref } from 'vue';
+
+interface StudentNotification {
+    id: number;
+    teacher_name: string;
+    lesson_name: string;
+    answer_preview: string;
+    created_at: string;
+}
 
 const page = usePage();
 const mobileMenuOpen = ref(false);
+const lastSeenAt = ref<string | null>(null);
+
+onMounted(() => {
+    lastSeenAt.value = localStorage.getItem('student_notifications_seen_at');
+});
+
+const notifications = computed<StudentNotification[]>(() => {
+    const data = (page.props as any).notifications;
+    return data?.studentNotifications || [];
+});
+
+const unreadCount = computed(() => {
+    if (!lastSeenAt.value || notifications.value.length === 0) {
+        return notifications.value.length;
+    }
+    const seenDate = new Date(lastSeenAt.value);
+    return notifications.value.filter((n) => new Date(n.created_at) > seenDate)
+        .length;
+});
+
+const markAllAsRead = () => {
+    const now = new Date().toISOString();
+    localStorage.setItem('student_notifications_seen_at', now);
+    lastSeenAt.value = now;
+};
+
+const timeAgo = (dateStr: string): string => {
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (diffMin < 1) return 'Ahora';
+    if (diffMin < 60) return `Hace ${diffMin}m`;
+    const diffHours = Math.floor(diffMin / 60);
+    if (diffHours < 24) return `Hace ${diffHours}h`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 7) return `Hace ${diffDays}d`;
+    return date.toLocaleDateString('es');
+};
 
 const navigation = [
     {
@@ -71,6 +119,7 @@ const userInitials = computed(() => {
     <div
         class="min-h-screen bg-gradient-to-br from-indigo-50 via-white to-cyan-50"
     >
+        <FlashMessage />
         <Head title="Plataforma de Aprendizaje" />
 
         <!-- Modern Floating Header -->
@@ -154,42 +203,114 @@ const userInitials = computed(() => {
                             </div>
 
                             <!-- Notifications -->
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                class="relative rounded-xl hover:bg-gray-100"
-                            >
-                                <Bell class="h-5 w-5 text-gray-600" />
-                                <span
-                                    class="absolute top-2 right-2 flex h-2 w-2"
-                                >
-                                    <span
-                                        class="absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75"
-                                    ></span>
-                                    <span
-                                        class="relative inline-flex h-2 w-2 rounded-full bg-red-500"
-                                    ></span>
-                                </span>
-                            </Button>
-
-                            <!-- Shopping Cart -->
-                            <Link href="/cart">
-                                <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    class="relative rounded-xl hover:bg-gray-100"
-                                >
-                                    <ShoppingCart
-                                        class="h-5 w-5 text-gray-600"
-                                    />
-                                    <span
-                                        v-if="$page.props.cartCount > 0"
-                                        class="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white"
+                            <DropdownMenu>
+                                <DropdownMenuTrigger as-child>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        class="relative rounded-xl hover:bg-gray-100"
                                     >
-                                        {{ $page.props.cartCount }}
-                                    </span>
-                                </Button>
-                            </Link>
+                                        <Bell class="h-5 w-5 text-gray-600" />
+                                        <span
+                                            v-if="unreadCount > 0"
+                                            class="absolute -top-0.5 -right-0.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white"
+                                        >
+                                            {{
+                                                unreadCount > 9
+                                                    ? '9+'
+                                                    : unreadCount
+                                            }}
+                                        </span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" class="w-80">
+                                    <DropdownMenuLabel
+                                        class="flex items-center justify-between"
+                                    >
+                                        <span>Notificaciones</span>
+                                        <button
+                                            v-if="unreadCount > 0"
+                                            @click.stop="markAllAsRead"
+                                            class="flex items-center gap-1 text-xs font-normal text-blue-600 hover:text-blue-800"
+                                        >
+                                            <Check class="h-3 w-3" />
+                                            Marcar como leídas
+                                        </button>
+                                    </DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+
+                                    <div
+                                        v-if="notifications.length === 0"
+                                        class="px-4 py-6 text-center"
+                                    >
+                                        <Bell
+                                            class="mx-auto h-8 w-8 text-gray-300"
+                                        />
+                                        <p class="mt-2 text-sm text-gray-500">
+                                            No hay notificaciones
+                                        </p>
+                                    </div>
+
+                                    <div
+                                        v-else
+                                        class="max-h-72 overflow-y-auto"
+                                    >
+                                        <DropdownMenuItem
+                                            v-for="notif in notifications"
+                                            :key="notif.id"
+                                            class="flex cursor-default flex-col items-start gap-1 px-4 py-3"
+                                            :class="{
+                                                'bg-blue-50/50':
+                                                    !lastSeenAt ||
+                                                    new Date(notif.created_at) >
+                                                        new Date(lastSeenAt),
+                                            }"
+                                        >
+                                            <div
+                                                class="flex w-full items-start justify-between gap-2"
+                                            >
+                                                <div
+                                                    class="flex items-center gap-2"
+                                                >
+                                                    <MessageCircle
+                                                        class="h-4 w-4 shrink-0 text-blue-500"
+                                                    />
+                                                    <span
+                                                        class="text-sm font-medium text-gray-900"
+                                                    >
+                                                        {{ notif.teacher_name }}
+                                                    </span>
+                                                </div>
+                                                <span
+                                                    class="shrink-0 text-[10px] text-gray-400"
+                                                >
+                                                    {{
+                                                        timeAgo(
+                                                            notif.created_at,
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                            <p
+                                                class="pl-6 text-xs text-gray-500"
+                                            >
+                                                respondió en
+                                                <span
+                                                    class="font-medium text-gray-700"
+                                                    >{{
+                                                        notif.lesson_name
+                                                    }}</span
+                                                >
+                                            </p>
+                                            <p
+                                                class="pl-6 text-xs text-gray-600"
+                                            >
+                                                "{{ notif.answer_preview }}"
+                                            </p>
+                                        </DropdownMenuItem>
+                                    </div>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
 
                             <!-- User Menu -->
                             <DropdownMenu>
@@ -329,8 +450,8 @@ const userInitials = computed(() => {
         </header>
 
         <!-- Main Content with proper spacing for fixed header -->
-        <main class="px-6 pt-32 pb-8">
-            <div class="mx-auto max-w-7xl">
+        <main class="pt-32 pb-8">
+            <div class="mx-auto max-w-7xl px-6">
                 <slot />
             </div>
         </main>

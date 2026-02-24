@@ -30,11 +30,11 @@ export default defineConfig({
         // En Windows/Laragon, 'localhost' puede resolverse a IPv6 (::1) y provocar
         // que el navegador no pueda conectar al dev server desde 127.0.0.1.
         host: '127.0.0.1',
-        port: 5173,
-        strictPort: false, // Permite usar otro puerto automáticamente si 5173 está ocupado
+        port: 5174,
+        strictPort: true,
         hmr: {
             host: 'educational-platform.test',
-            // No especificar port ni clientPort permite que HMR use el puerto asignado automáticamente
+            port: 5174,
         },
     },
 });

@@ -3,6 +3,7 @@ import {
     SidebarGroup,
     SidebarGroupLabel,
     SidebarMenu,
+    SidebarMenuBadge,
     SidebarMenuButton,
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
@@ -32,6 +33,9 @@ const page = usePage();
                         <span>{{ item.title }}</span>
                     </Link>
                 </SidebarMenuButton>
+                <SidebarMenuBadge v-if="item.badge && item.badge > 0">
+                    {{ item.badge }}
+                </SidebarMenuBadge>
             </SidebarMenuItem>
         </SidebarMenu>
     </SidebarGroup>

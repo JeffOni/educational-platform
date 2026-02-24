@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -23,12 +22,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'student_type',
     ];
-
-    // Tipos de estudiante
-    const STUDENT_EXTERNAL = 'external'; // Estudiante que solo compra cursos
-    const STUDENT_INTERNAL = 'internal'; // Estudiante de institución con tareas
 
     /**
      * The attributes that should be hidden for serialization.
@@ -56,31 +50,10 @@ class User extends Authenticatable
         ];
     }
 
-    // Helper methods para tipo de estudiante
-    public function isExternalStudent()
-    {
-        return $this->student_type === self::STUDENT_EXTERNAL;
-    }
-
-    public function isInternalStudent()
-    {
-        return $this->student_type === self::STUDENT_INTERNAL;
-    }
-
-    public function canSubmitAssignments()
-    {
-        return $this->student_type === self::STUDENT_INTERNAL;
-    }
-
     // Relaciones
     public function courses_dictated()
     {
         return $this->hasMany(Course::class);
-    }
-
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
     }
 
     public function enrollments()
@@ -93,8 +66,13 @@ class User extends Authenticatable
         return $this->belongsToMany(Lesson::class);
     }
 
-    public function purchases()
+    public function examAttempts()
     {
-        return $this->hasMany(Purchase::class);
+        return $this->hasMany(ExamAttempt::class);
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
     }
 }

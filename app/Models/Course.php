@@ -13,7 +13,6 @@ class Course extends Model
 
     protected $casts = [
         'status' => 'integer',
-        'price' => 'decimal:2',
     ];
 
     const BORRADOR = 1;
@@ -57,11 +56,6 @@ class Course extends Model
         return $this->hasMany(Section::class);
     }
 
-    public function reviews()
-    {
-        return $this->hasMany(Review::class);
-    }
-
     public function enrollments()
     {
         return $this->hasMany(Enrollment::class);
@@ -85,6 +79,16 @@ class Course extends Model
     public function activeDelegations()
     {
         return $this->hasMany(CourseDelegation::class)->active();
+    }
+
+    public function exam()
+    {
+        return $this->hasOne(CourseExam::class);
+    }
+
+    public function certificates()
+    {
+        return $this->hasMany(Certificate::class);
     }
 
     // Métodos helper para verificar permisos

@@ -1,7 +1,16 @@
 <script setup lang="ts">
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { BookOpen, MessageCircle, Send } from 'lucide-vue-next';
+import {
+    CheckCircle,
+    Clock,
+    CornerDownRight,
+    MessageCircle,
+    Send,
+} from 'lucide-vue-next';
 import { ref } from 'vue';
 
 interface User {
@@ -16,21 +25,17 @@ interface Answer {
     created_at: string;
 }
 
-interface Course {
-    id: number;
-    title: string;
-}
-
-interface Section {
-    id: number;
-    name: string;
-    course: Course;
-}
-
 interface Lesson {
     id: number;
     name: string;
-    section: Section;
+    section: {
+        id: number;
+        name: string;
+        course: {
+            id: number;
+            title: string;
+        };
+    };
 }
 
 interface Question {
@@ -46,121 +51,177 @@ interface PaginatedQuestions {
     data: Question[];
     current_page: number;
     last_page: number;
+    per_page: number;
     total: number;
+    next_page_url: string | null;
+    prev_page_url: string | null;
 }
 
-interface Props {
+defineProps<{
     questions: PaginatedQuestions;
-}
+}>();
 
-const props = defineProps<Props>();
+const replyingTo = ref<number | null>(null);
+const answerForms = ref<Record<number, ReturnType<typeof useForm>>>({});
 
-const answeringQuestion = ref<number | null>(null);
-const answerForms = ref<{ [key: number]: ReturnType<typeof useForm> }>({});
-
-const startAnswering = (questionId: number) => {
-    answeringQuestion.value = questionId;
+const toggleReply = (questionId: number) => {
+    if (replyingTo.value === questionId) {
+        replyingTo.value = null;
+        return;
+    }
+    replyingTo.value = questionId;
     if (!answerForms.value[questionId]) {
-        answerForms.value[questionId] = useForm({
-            answer: '',
-        });
+        answerForms.value[questionId] = useForm({ answer: '' });
     }
 };
 
 const submitAnswer = (questionId: number) => {
     const form = answerForms.value[questionId];
-    if (form) {
-        form.post(route('admin.questions.answer', questionId), {
-            preserveScroll: true,
-            onSuccess: () => {
-                answeringQuestion.value = null;
-                form.reset();
-            },
-        });
-    }
+    if (!form) return;
+    form.post(`/admin/questions/${questionId}/answer`, {
+        preserveScroll: true,
+        onSuccess: () => {
+            form.reset();
+            replyingTo.value = null;
+        },
+    });
 };
 
 const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString('es-ES', {
         year: 'numeric',
-        month: 'long',
+        month: 'short',
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
     });
 };
+
+const breadcrumbs = [
+    { title: 'Dashboard', href: '/dashboard' },
+    { title: 'Preguntas', href: '#' },
+];
 </script>
 
 <template>
-    <Head title="Preguntas de Estudiantes" />
+    <AppLayout :breadcrumbs="breadcrumbs">
+        <Head title="Preguntas de Estudiantes" />
 
-    <AppLayout>
-        <div class="py-12">
-            <div class="w-full sm:px-6 lg:px-8">
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <div class="border-b p-6">
-                        <div class="flex items-center gap-3">
-                            <MessageCircle class="h-8 w-8 text-indigo-600" />
-                            <div>
-                                <h2 class="text-2xl font-bold text-gray-900">
-                                    Preguntas de Estudiantes
-                                </h2>
-                                <p class="mt-1 text-gray-600">
-                                    Responde las preguntas de tus estudiantes
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="p-6">
-                        <!-- Sin preguntas -->
-                        <div
-                            v-if="questions.data.length === 0"
-                            class="py-12 text-center"
-                        >
-                            <MessageCircle
-                                class="mx-auto mb-4 h-16 w-16 text-gray-300"
-                            />
-                            <p class="text-lg text-gray-500">
-                                No hay preguntas pendientes
+        <div class="w-full p-4 sm:p-6 lg:p-8">
+            <Card>
+                <CardHeader>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <CardTitle
+                                class="flex items-center gap-3 text-lg"
+                            >
+                                <MessageCircle
+                                    class="h-5 w-5 text-indigo-600"
+                                />
+                                Preguntas de Estudiantes
+                            </CardTitle>
+                            <p class="mt-2 text-sm text-gray-500">
+                                {{ questions.total }} pregunta{{
+                                    questions.total !== 1 ? 's' : ''
+                                }}
+                                en tus cursos
                             </p>
                         </div>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <!-- Sin preguntas -->
+                    <div
+                        v-if="questions.data.length === 0"
+                        class="py-16 text-center"
+                    >
+                        <MessageCircle
+                            class="mx-auto h-12 w-12 text-gray-300"
+                        />
+                        <p class="mt-4 text-lg font-medium text-gray-600">
+                            No hay preguntas pendientes
+                        </p>
+                        <p class="mt-1 text-sm text-gray-500">
+                            Las preguntas de tus estudiantes aparecerán aquí
+                        </p>
+                    </div>
 
-                        <!-- Lista de preguntas -->
-                        <div v-else class="space-y-6">
+                    <!-- Lista de preguntas -->
+                    <div v-else class="space-y-4">
+                        <div
+                            v-for="question in questions.data"
+                            :key="question.id"
+                            class="rounded-lg border"
+                            :class="
+                                question.answers.length === 0
+                                    ? 'border-amber-200 bg-amber-50/30'
+                                    : 'border-gray-200 bg-white'
+                            "
+                        >
+                            <!-- Header: Curso y Lección -->
                             <div
-                                v-for="question in questions.data"
-                                :key="question.id"
-                                class="rounded-lg border border-gray-200 p-6 transition hover:border-indigo-300"
+                                class="flex items-center justify-between border-b px-5 py-3"
+                                :class="
+                                    question.answers.length === 0
+                                        ? 'border-amber-100 bg-amber-50/50'
+                                        : 'border-gray-100 bg-gray-50'
+                                "
                             >
-                                <!-- Información del curso y lección -->
-                                <div
-                                    class="mb-3 flex items-center gap-2 text-sm text-gray-600"
-                                >
-                                    <BookOpen class="h-4 w-4" />
-                                    <span class="font-semibold">{{
-                                        question.lesson.section.course.title
-                                    }}</span>
-                                    <span>›</span>
-                                    <span>{{
-                                        question.lesson.section.name
-                                    }}</span>
-                                    <span>›</span>
-                                    <span>{{ question.lesson.name }}</span>
+                                <div class="flex items-center gap-2 text-sm">
+                                    <span class="font-medium text-gray-900">
+                                        {{
+                                            question.lesson.section.course.title
+                                        }}
+                                    </span>
+                                    <span class="text-gray-400">/</span>
+                                    <span class="text-gray-600">
+                                        {{ question.lesson.section.name }}
+                                    </span>
+                                    <span class="text-gray-400">/</span>
+                                    <span class="text-gray-600">
+                                        {{ question.lesson.name }}
+                                    </span>
                                 </div>
+                                <Badge
+                                    :variant="
+                                        question.answers.length === 0
+                                            ? 'destructive'
+                                            : 'default'
+                                    "
+                                    class="text-xs"
+                                >
+                                    <template
+                                        v-if="question.answers.length === 0"
+                                    >
+                                        <Clock class="mr-1 h-3 w-3" />
+                                        Sin responder
+                                    </template>
+                                    <template v-else>
+                                        <CheckCircle class="mr-1 h-3 w-3" />
+                                        {{
+                                            question.answers.length
+                                        }}
+                                        respuesta{{
+                                            question.answers.length !== 1
+                                                ? 's'
+                                                : ''
+                                        }}
+                                    </template>
+                                </Badge>
+                            </div>
 
-                                <!-- Pregunta -->
-                                <div class="mb-4 flex gap-4">
+                            <!-- Pregunta -->
+                            <div class="p-5">
+                                <div class="flex gap-3">
                                     <div class="flex-shrink-0">
                                         <div
-                                            class="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100"
+                                            class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-100"
                                         >
                                             <span
-                                                class="text-lg font-semibold text-indigo-600"
-                                                >{{
-                                                    question.user.name[0]
-                                                }}</span
+                                                class="font-semibold text-indigo-600"
                                             >
+                                                {{ question.user.name[0] }}
+                                            </span>
                                         </div>
                                     </div>
                                     <div class="flex-1">
@@ -169,116 +230,182 @@ const formatDate = (date: string) => {
                                         >
                                             <span
                                                 class="font-semibold text-gray-900"
-                                                >{{ question.user.name }}</span
                                             >
-                                            <span
-                                                class="text-xs text-gray-500"
-                                                >{{
+                                                {{ question.user.name }}
+                                            </span>
+                                            <Badge
+                                                variant="secondary"
+                                                class="text-xs"
+                                            >
+                                                Estudiante
+                                            </Badge>
+                                            <span class="text-xs text-gray-500">
+                                                {{
                                                     formatDate(
                                                         question.created_at,
                                                     )
-                                                }}</span
-                                            >
+                                                }}
+                                            </span>
                                         </div>
-                                        <p class="text-lg text-gray-700">
+                                        <p
+                                            class="whitespace-pre-wrap text-gray-700"
+                                        >
                                             {{ question.question }}
                                         </p>
+
+                                        <!-- Botón responder -->
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            class="mt-3 text-indigo-600 hover:text-indigo-700"
+                                            @click="toggleReply(question.id)"
+                                        >
+                                            <CornerDownRight
+                                                class="mr-1.5 h-3.5 w-3.5"
+                                            />
+                                            {{
+                                                replyingTo === question.id
+                                                    ? 'Cancelar'
+                                                    : question.answers.length >
+                                                        0
+                                                      ? 'Añadir respuesta'
+                                                      : 'Responder'
+                                            }}
+                                        </Button>
                                     </div>
                                 </div>
+                            </div>
 
-                                <!-- Respuestas existentes -->
-                                <div
-                                    v-if="question.answers.length > 0"
-                                    class="mb-4 ml-16 space-y-3"
-                                >
+                            <!-- Respuestas existentes -->
+                            <div
+                                v-if="
+                                    question.answers.length > 0 ||
+                                    replyingTo === question.id
+                                "
+                                class="border-t border-gray-100 bg-gray-50/50"
+                            >
+                                <div class="divide-y divide-gray-100">
                                     <div
                                         v-for="answer in question.answers"
                                         :key="answer.id"
-                                        class="rounded-lg border-l-4 border-green-500 bg-green-50 p-4"
+                                        class="flex gap-3 px-5 py-4 pl-14"
                                     >
-                                        <div
-                                            class="mb-2 flex items-center gap-2"
-                                        >
-                                            <span
-                                                class="text-sm font-semibold text-gray-900"
-                                                >{{ answer.user.name }}</span
+                                        <div class="flex-shrink-0">
+                                            <div
+                                                class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100"
                                             >
-                                            <span
-                                                class="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700"
-                                                >Instructor</span
-                                            >
-                                            <span
-                                                class="text-xs text-gray-500"
-                                                >{{
-                                                    formatDate(
-                                                        answer.created_at,
-                                                    )
-                                                }}</span
-                                            >
+                                                <span
+                                                    class="text-sm font-semibold text-emerald-600"
+                                                >
+                                                    {{ answer.user.name[0] }}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <p class="text-gray-700">
-                                            {{ answer.answer }}
-                                        </p>
+                                        <div class="flex-1">
+                                            <div
+                                                class="mb-1 flex items-center gap-2"
+                                            >
+                                                <span
+                                                    class="text-sm font-semibold text-gray-900"
+                                                >
+                                                    {{ answer.user.name }}
+                                                </span>
+                                                <Badge
+                                                    variant="secondary"
+                                                    class="text-xs"
+                                                >
+                                                    Instructor
+                                                </Badge>
+                                                <span
+                                                    class="text-xs text-gray-500"
+                                                >
+                                                    {{
+                                                        formatDate(
+                                                            answer.created_at,
+                                                        )
+                                                    }}
+                                                </span>
+                                            </div>
+                                            <p
+                                                class="text-sm whitespace-pre-wrap text-gray-700"
+                                            >
+                                                {{ answer.answer }}
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
 
                                 <!-- Formulario de respuesta -->
-                                <div class="ml-16">
-                                    <div
-                                        v-if="answeringQuestion === question.id"
-                                        class="rounded-lg bg-gray-50 p-4"
+                                <div
+                                    v-if="replyingTo === question.id"
+                                    class="border-t border-gray-200 px-5 py-4 pl-14"
+                                >
+                                    <form
+                                        @submit.prevent="
+                                            submitAnswer(question.id)
+                                        "
+                                        class="flex gap-3"
                                     >
-                                        <form
-                                            @submit.prevent="
-                                                submitAnswer(question.id)
-                                            "
-                                            class="space-y-3"
-                                        >
+                                        <div class="flex-shrink-0">
+                                            <div
+                                                class="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-100"
+                                            >
+                                                <span
+                                                    class="text-sm font-semibold text-emerald-600"
+                                                    >T</span
+                                                >
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
                                             <textarea
                                                 v-model="
                                                     answerForms[question.id]
                                                         .answer
                                                 "
                                                 rows="3"
-                                                class="w-full rounded-lg border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                                placeholder="Escribe tu respuesta..."
+                                                class="w-full rounded-lg border-gray-300 px-4 py-3 text-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                                placeholder="Escribe tu respuesta al estudiante..."
                                                 required
                                             ></textarea>
-                                            <div class="flex justify-end gap-2">
-                                                <button
+                                            <p
+                                                v-if="
+                                                    answerForms[question.id]
+                                                        ?.errors?.answer
+                                                "
+                                                class="mt-1 text-xs text-red-600"
+                                            >
+                                                {{
+                                                    answerForms[question.id]
+                                                        .errors.answer
+                                                }}
+                                            </p>
+                                            <div
+                                                class="mt-2 flex justify-end gap-2"
+                                            >
+                                                <Button
                                                     type="button"
-                                                    @click="
-                                                        answeringQuestion = null
-                                                    "
-                                                    class="rounded-lg px-4 py-2 text-gray-700 transition hover:bg-gray-200"
+                                                    variant="outline"
+                                                    size="sm"
+                                                    @click="replyingTo = null"
                                                 >
                                                     Cancelar
-                                                </button>
-                                                <button
+                                                </Button>
+                                                <Button
                                                     type="submit"
+                                                    size="sm"
                                                     :disabled="
                                                         answerForms[question.id]
                                                             ?.processing
                                                     "
-                                                    class="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-white transition hover:bg-indigo-700 disabled:opacity-50"
                                                 >
-                                                    <Send class="h-4 w-4" />
+                                                    <Send
+                                                        class="mr-1.5 h-3.5 w-3.5"
+                                                    />
                                                     Enviar respuesta
-                                                </button>
+                                                </Button>
                                             </div>
-                                        </form>
-                                    </div>
-                                    <button
-                                        v-else
-                                        @click="startAnswering(question.id)"
-                                        class="text-sm font-medium text-indigo-600 hover:text-indigo-700"
-                                    >
-                                        {{
-                                            question.answers.length > 0
-                                                ? 'Añadir otra respuesta'
-                                                : 'Responder'
-                                        }}
-                                    </button>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
@@ -286,27 +413,36 @@ const formatDate = (date: string) => {
                         <!-- Paginación -->
                         <div
                             v-if="questions.last_page > 1"
-                            class="mt-6 flex justify-center"
+                            class="flex items-center justify-between border-t pt-4"
                         >
-                            <nav class="flex gap-2">
-                                <a
-                                    v-for="page in questions.last_page"
-                                    :key="page"
-                                    :href="`?page=${page}`"
-                                    :class="[
-                                        'rounded-lg px-4 py-2 font-medium transition',
-                                        page === questions.current_page
-                                            ? 'bg-indigo-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200',
-                                    ]"
+                            <p class="text-sm text-gray-600">
+                                Página {{ questions.current_page }} de
+                                {{ questions.last_page }}
+                            </p>
+                            <div class="flex gap-2">
+                                <Button
+                                    v-if="questions.prev_page_url"
+                                    variant="outline"
+                                    size="sm"
+                                    as="a"
+                                    :href="questions.prev_page_url"
                                 >
-                                    {{ page }}
-                                </a>
-                            </nav>
+                                    Anterior
+                                </Button>
+                                <Button
+                                    v-if="questions.next_page_url"
+                                    variant="outline"
+                                    size="sm"
+                                    as="a"
+                                    :href="questions.next_page_url"
+                                >
+                                    Siguiente
+                                </Button>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
+                </CardContent>
+            </Card>
         </div>
     </AppLayout>
 </template>
