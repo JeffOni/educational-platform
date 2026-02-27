@@ -2,7 +2,7 @@
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import Curriculum from './Partials/Curriculum.vue';
 import Delegations from './Partials/Delegations.vue';
@@ -181,7 +181,7 @@ const breadcrumbs = [
 
             <!-- Tabs -->
             <Tabs default-value="info" class="w-full">
-                <TabsList class="grid w-full grid-cols-3">
+                <TabsList class="grid w-full grid-cols-4">
                     <TabsTrigger value="info"
                         >Información del Curso</TabsTrigger
                     >
@@ -189,6 +189,7 @@ const breadcrumbs = [
                         >Contenido del Curso</TabsTrigger
                     >
                     <TabsTrigger value="delegations">Delegaciones</TabsTrigger>
+                    <TabsTrigger value="exam">Examen</TabsTrigger>
                 </TabsList>
 
                 <!-- Tab: Información -->
@@ -541,6 +542,29 @@ const breadcrumbs = [
                 </TabsContent>
                 <TabsContent value="curriculum">
                     <Curriculum :course="course" />
+                </TabsContent>
+
+                <!-- Tab: Examen -->
+                <TabsContent value="exam">
+                    <div class="rounded-lg bg-white p-6 shadow">
+                        <div class="text-center">
+                            <h2
+                                class="mb-2 text-xl font-semibold text-blue-600"
+                            >
+                                Examen Final del Curso
+                            </h2>
+                            <p class="mb-6 text-gray-600">
+                                Configura el examen de evaluación final para tus
+                                estudiantes
+                            </p>
+                            <Link
+                                :href="`/admin/courses/${course.id}/exam`"
+                                class="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-6 py-3 font-semibold text-white transition hover:bg-indigo-700"
+                            >
+                                Gestionar Examen
+                            </Link>
+                        </div>
+                    </div>
                 </TabsContent>
             </Tabs>
         </div>
